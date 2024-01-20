@@ -99,10 +99,14 @@ const shop = () => {
   const onChangeSearchBrands = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchBrands(event.target.value);
   }
+  const clickedStatusBrands = () => {
+    setIsCheckedBrands(!isCheckedBrands);
+  }
 
   const [expandFilter, setExpandFilter] = useState<boolean>(false);
   const [brands, setBrands] = useState<Array<brandsProps>>([]);
   const [searchBrands, setSearchBrands] = useState<string>("");
+  const [isCheckedBrands, setIsCheckedBrands] = useState<boolean>(false);
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
     {
       name: "신상",
@@ -129,24 +133,34 @@ const shop = () => {
   const filterBrand = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
-        <div className={style.search}>
-          <div className={style.image}>
-            <Image src={searchIcon.image} alt={searchIcon.name} />
-          </div>
-          <div className={style.input}>
-            <input type="text" onChange={(event) => onChangeSearchBrands(event)} />
+        <div className={style.condition}>
+          <div className={style.section}>
+            <div className={style.search}>
+              <div className={style.image}>
+                <Image src={searchIcon.image} alt={searchIcon.name} />
+              </div>
+              <div className={style.input}>
+                <input type="text" onChange={(event) => onChangeSearchBrands(event)} />
+              </div>
+            </div>
+            <div className={`${style.status} ${isCheckedBrands && style.toggledStatus}`} onClick={clickedStatusBrands}>
+              <h4>체크된 것만 보기</h4>
+            </div>
           </div>
         </div>
         <div className={style.brands}>
           {
             brands.map((brand, index) => (
               brand.name.toUpperCase().includes(searchBrands.toUpperCase()) ? (
-                <div className={style.brand} key={index}>
-                  <label>
-                    <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => clickedBrand(brand.name)} />
-                    <h4>{brand.name}</h4>
-                  </label>
-                </div>
+                !isCheckedBrands || brand.isChecked ? (
+                  <div className={style.brand} key={index}>
+                    <label>
+                      <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => clickedBrand(brand.name)} />
+                      <h4>{brand.name}</h4>
+                    </label>
+                  </div>
+                )
+                : ''
               )
               : ''
             ))

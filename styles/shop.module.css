@@ -74,12 +74,21 @@
   height: calc(100% - 31px);
   border-bottom: 1px solid dimgray;
 }
-.select > .search {
+.select > .condition {
+  display: flex;
+  width: 100%;
+}
+.condition > .section {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+}
+.section > .search {
   display: flex;
   width: 300px;
   padding-left: 5px;
   border-bottom: 1px solid dimgray;
-  margin: 10px 20px;
 }
 .search > .input {
   display: flex;
@@ -99,6 +108,22 @@
 .image > img {
   width: 16px;
   height: 16px;
+}
+.section > .status {
+  cursor: pointer;
+  padding: 0px 3px;
+  border: 1px solid dimgray;
+  border-radius: 5px;
+  border-bottom-right-radius: 0px;
+  filter: invert(0.8);
+}
+.section > .status:hover {
+  filter: invert(0);
+}
+.section > .toggledStatus {
+  filter: invert(0) !important;
+  color: coral !important;
+  border-color: coral !important;
 }
 .select > .brands {
   display: flex;
