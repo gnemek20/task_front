@@ -8,7 +8,7 @@ const shop = () => {
     image: any;
   }
 
-  const categories: string[] = ["전체", "의류"];
+  const categories: string[] = ["전체", "의류", "신발", "악세서리"];
   const states: StateProps[] = [
     {
       name: "search",

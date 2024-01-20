@@ -1,13 +1,12 @@
 .header {
   position: fixed;
   display: flex;
-  justify-content: space-between;
   width: 100vw;
   border-bottom: 1px solid black;
 }
 .header > .section {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   width: 100%;
   max-width: var(--max-height);
   padding: 20px 30px;
@@ -21,6 +20,7 @@
   cursor: pointer;
 }
 .section > .category {
+  justify-content: center;
   align-items: end;
   gap: 20px;
 }
@@ -29,6 +29,7 @@
   padding: 3px;
 }
 .section > .state {
+  justify-content: end;
   gap: 20px;
 }
 .state > * {
