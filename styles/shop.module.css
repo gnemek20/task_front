@@ -1,0 +1,40 @@
+.header {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  width: 100vw;
+  border-bottom: 1px solid black;
+}
+.header > .section {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--max-height);
+  padding: 20px 30px;
+  margin: 0px auto;
+}
+.section > * {
+  display: flex;
+  align-items: center;
+}
+.section > .title {
+  cursor: pointer;
+}
+.section > .category {
+  align-items: end;
+  gap: 20px;
+}
+.category > * {
+  cursor: pointer;
+  padding: 3px;
+}
+.section > .state {
+  gap: 20px;
+}
+.state > * {
+  cursor: pointer;
+  padding: 5px;
+}
+.state > *:hover {
+  filter: invert(0.8);
+}
