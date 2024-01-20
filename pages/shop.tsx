@@ -1,8 +1,7 @@
 import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { useEffect, useState } from "react";
-import { exit } from "process";
+import { ChangeEvent, useEffect, useState } from "react";
 
 const shop = () => {
   type ImageIcons = string | StaticImport;
@@ -49,8 +48,10 @@ const shop = () => {
   const reload = () => {
     window.location.reload();
   }
+
   const clickedFilterButton = () => {
     setExpandFilter(!expandFilter);
+    setSearchBrands("");
   }
   const clickedFilterOption = (name: filterOptionsProps["name"]) => {
     if (name == filterOptions[0].name) {
@@ -95,8 +96,13 @@ const shop = () => {
     }
   }
 
+  const onChangeSearchBrands = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchBrands(event.target.value);
+  }
+
   const [expandFilter, setExpandFilter] = useState<boolean>(false);
   const [brands, setBrands] = useState<Array<brandsProps>>([]);
+  const [searchBrands, setSearchBrands] = useState<string>("");
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
     {
       name: "신상",
@@ -105,7 +111,7 @@ const shop = () => {
     },
     {
       name: "브랜드",
-      isClicked: false,
+      isClicked: true,
       isToggled: false,
     },
     {
@@ -128,18 +134,21 @@ const shop = () => {
             <Image src={searchIcon.image} alt={searchIcon.name} />
           </div>
           <div className={style.input}>
-            <input type="text" />
+            <input type="text" onChange={(event) => onChangeSearchBrands(event)} />
           </div>
         </div>
         <div className={style.brands}>
           {
             brands.map((brand, index) => (
-              <div className={style.brand} key={index}>
-                <label>
-                  <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => clickedBrand(brand.name)} />
-                  <h4>{brand.name}</h4>
-                </label>
-              </div>
+              brand.name.toUpperCase().includes(searchBrands.toUpperCase()) ? (
+                <div className={style.brand} key={index}>
+                  <label>
+                    <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => clickedBrand(brand.name)} />
+                    <h4>{brand.name}</h4>
+                  </label>
+                </div>
+              )
+              : ''
             ))
           }
         </div>
@@ -150,35 +159,35 @@ const shop = () => {
   useEffect(() => {
     setBrands([...brands,
       {
-        name: "나이키",
+        name: "Nike",
         isChecked: false,
       },
       {
-        name: "뉴발란스",
+        name: "Louis Vuitton",
         isChecked: false,
       },
       {
-        name: "루이비통",
+        name: "Chanel",
         isChecked: false,
       },
       {
-        name: "자라",
+        name: "Gucci",
         isChecked: false,
       },
       {
-        name: "유니클로",
+        name: "Adidas",
         isChecked: false,
       },
       {
-        name: "아디다스",
+        name: "Rolex",
         isChecked: false,
       },
       {
-        name: "크리스찬디올",
+        name: "Dior",
         isChecked: false,
       },
       {
-        name: "배럴",
+        name: "Zara",
         isChecked: false,
       },
     ]);

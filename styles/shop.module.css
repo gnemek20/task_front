@@ -118,6 +118,9 @@
   padding: 5px 5px;
   gap: 10px;
 }
+.brand input {
+  cursor: pointer;
+}
 .section > .option {
   display: flex;
   justify-content: start;
