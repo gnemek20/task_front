@@ -12,7 +12,7 @@ const shop = () => {
   }
   interface filterOptionsProps {
     name: string;
-    isClicked: boolean;
+    isClicked?: boolean;
     isToggled: boolean;
   }
   interface brandsProps {
@@ -54,8 +54,12 @@ const shop = () => {
     setSearchBrands("");
   }
   const clickedFilterOption = (name: filterOptionsProps["name"]) => {
-    if (name == filterOptions[0].name) {
-      filterOptions[0].isToggled = !filterOptions[0].isToggled;
+    if (exceptionFilterOptions.includes(name)) {
+      filterOptions.map((option) => {
+        if (option.name == name) {
+          option.isToggled = !option.isToggled;
+        }
+      });
       setFilterOptions([...filterOptions]);
 
       return;
@@ -66,11 +70,11 @@ const shop = () => {
         option.isClicked = true;
         setFilterOptions([...filterOptions]);
       }
-      else {
+      else if (!exceptionFilterOptions.includes(option.name)) {
         option.isClicked = false;
         setFilterOptions([...filterOptions]);
       }
-    })
+    });
   }
   const clickedBrand = (name: brandsProps["name"]) => {
     let checked = false;
@@ -87,13 +91,21 @@ const shop = () => {
     });
 
     if (checked) {
-      filterOptions[1].isToggled = true;
-      setFilterOptions([...filterOptions]);
+      filterOptions.map((option) => {
+        if (option.name == "브랜드") {
+          option.isToggled = true;
+        }
+      });
     }
     else {
-      filterOptions[1].isToggled = false;
-      setFilterOptions([...filterOptions]);
+      filterOptions.map((option) => {
+        if (option.name == "브랜드") {
+          option.isToggled = false;
+        }
+      });
     }
+
+    setFilterOptions([...filterOptions]);
   }
 
   const onChangeSearchBrands = (event: ChangeEvent<HTMLInputElement>) => {
@@ -107,10 +119,15 @@ const shop = () => {
   const [brands, setBrands] = useState<Array<brandsProps>>([]);
   const [searchBrands, setSearchBrands] = useState<string>("");
   const [isCheckedBrands, setIsCheckedBrands] = useState<boolean>(false);
+
+  const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절"];
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
     {
       name: "신상",
-      isClicked: false,
+      isToggled: false,
+    },
+    {
+      name: "품절",
       isToggled: false,
     },
     {
@@ -129,6 +146,26 @@ const shop = () => {
       isToggled: false,
     },
   ]);
+
+  const clickedFilter = () => {
+    let returnTemplate: JSX.Element = (<div><h4>None Template</h4></div>);
+
+    filterOptions.map((option) => {
+      if (option.isClicked) {
+        switch (option.name) {
+          case "브랜드":
+            returnTemplate = filterBrand();
+            break;
+          case "가격":
+            break;
+          case "프로모션":
+            break;
+        }
+      }
+    });
+
+    return returnTemplate;
+  }
 
   const filterBrand = () => {
     return (
@@ -234,9 +271,10 @@ const shop = () => {
         <div className={style.section}>
           {
             expandFilter && (
-              filterOptions[1].isClicked && (
-                filterBrand()
-              )
+              // filterOptions[1].isClicked && (
+              //   filterBrand()
+              // )
+              clickedFilter()
             )
           }
           <div className={style.option}>
