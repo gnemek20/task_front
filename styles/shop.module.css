@@ -3,6 +3,7 @@
   display: flex;
   width: 100vw;
   border-bottom: 1px solid black;
+  background-color: white;
 }
 .header > .section {
   display: grid;
@@ -19,12 +20,12 @@
 .section > .title {
   cursor: pointer;
 }
-.section > .category {
+.section > .categories {
   justify-content: center;
   align-items: end;
   gap: 20px;
 }
-.category > * {
+.categories > * {
   cursor: pointer;
   padding: 3px;
 }
@@ -40,4 +41,133 @@
 }
 .state > *:hover {
   filter: invert(0.8);
+}
+
+.filter {
+  position: fixed;
+  left: calc(50% - min(50% - 30px, 700px));
+  bottom: 50px;
+  width: 72px;
+  height: 31px;
+  border: 1px solid dimgray;
+  border-radius: 5px;
+  background-color: white;
+  transition: 300ms;
+  user-select: none;
+}
+.expandedFilter {
+  width: 500px;
+  height: 300px;
+}
+.filter > .section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.section > .select {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 100%;
+  height: calc(100% - 31px);
+  border-bottom: 1px solid dimgray;
+}
+.select > .search {
+  display: flex;
+  width: 300px;
+  padding-left: 5px;
+  border-bottom: 1px solid dimgray;
+  margin: 10px 20px;
+}
+.search > .input {
+  display: flex;
+  width: 100%;
+}
+.input > input {
+  width: 100%;
+  padding: 5px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+.search > .image {
+  display: flex;
+  align-items: center;
+}
+.image > img {
+  width: 16px;
+  height: 16px;
+}
+.select > .brands {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  gap: 5px;
+}
+.brands > .brand {
+  display: flex;
+  padding: 0px 15px;
+}
+.brand > label {
+  cursor: pointer;
+  display: flex;
+  padding: 5px 5px;
+  gap: 10px;
+}
+.section > .option {
+  display: flex;
+  justify-content: start;
+  margin-top: auto;
+}
+.option > .button {
+  cursor: pointer;
+  display: flex;
+  padding: 5px;
+  gap: 10px;
+}
+.button > img {
+  width: 20px;
+  height: 20px;
+}
+.options {
+  position: absolute;
+  right: 0px;
+  display: flex;
+  gap: 10px;
+}
+.options > * {
+  cursor: pointer;
+  padding: 5px;
+  filter: invert(0.8);
+  transition: 200ms;
+}
+.options > *:hover {
+  filter: invert(0);
+}
+.options > .clickedOption {
+  filter: invert(0);
+  color: black;
+}
+.options > .toggledOption {
+  filter: invert(0);
+  color: coral !important;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  animation: fadeIn;
+  animation-duration: 300ms;
+  animation-fill-mode: backwards;
 }
