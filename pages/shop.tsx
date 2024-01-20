@@ -197,8 +197,8 @@ const shop = () => {
     <div>
       <div className={style.header}>
         <div className={style.section}>
-          <div className={style.title} onClick={reload}>
-            <h2>FETCHING</h2>
+          <div className={style.title}>
+            <h2 onClick={reload}>FETCHING</h2>
           </div>
           <div className={style.categories}>
             {
