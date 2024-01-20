@@ -157,6 +157,7 @@ const shop = () => {
             returnTemplate = filterBrand();
             break;
           case "가격":
+            returnTemplate = filterPrice();
             break;
           case "프로모션":
             break;
@@ -203,6 +204,14 @@ const shop = () => {
             ))
           }
         </div>
+      </div>
+    )
+  }
+
+  const filterPrice = () => {
+    return (
+      <div className={`${style.select} ${style.fadeIn}`}>
+
       </div>
     )
   }
@@ -271,9 +280,6 @@ const shop = () => {
         <div className={`${style.section} ${expandFilter && style.expandedSection}`}>
           {
             expandFilter && (
-              // filterOptions[1].isClicked && (
-              //   filterBrand()
-              // )
               clickedFilter()
             )
           }
