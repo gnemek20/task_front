@@ -42,7 +42,7 @@ const shop = () => {
           </div>
           <div className={style.state}>
               {states.map((state, index) => (
-                <Image key={index} src={state.image} alt={state.name} width={20} />
+                <Image key={index} src={state.image} alt={state.name} />
               ))}
           </div>
         </div>
