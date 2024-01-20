@@ -268,7 +268,7 @@ const shop = () => {
         </div>
       </div>
       <div className={`${style.filter} ${expandFilter && style.expandedFilter}`}>
-        <div className={style.section}>
+        <div className={`${style.section} ${expandFilter && style.expandedSection}`}>
           {
             expandFilter && (
               // filterOptions[1].isClicked && (

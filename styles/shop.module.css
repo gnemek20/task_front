@@ -49,21 +49,27 @@
   bottom: 50px;
   width: 72px;
   height: 31px;
-  border: 1px solid dimgray;
+  border: 1px solid black;
   border-radius: 5px;
-  background-color: white;
+  background-color: black;
   transition: 300ms;
   user-select: none;
 }
 .expandedFilter {
   width: 500px;
   height: 300px;
+  border-color: dimgray;
+  background-color: white;
 }
 .filter > .section {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  filter: invert(1);
+}
+.filter > .expandedSection {
+  filter: invert(0);
 }
 .section > .select {
   position: absolute;
