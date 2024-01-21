@@ -216,7 +216,6 @@
   cursor: pointer;
   padding: 10px 5px;
   filter: invert(0.8);
-  transition: 200ms;
 }
 .options > *:hover {
   filter: invert(0);
