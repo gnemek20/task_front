@@ -4,12 +4,17 @@ import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 
 const shop = () => {
-  type ImageIcons = string | StaticImport;
+  type typeImage = StaticImport;
+  type imageIcons = string | StaticImport;
   type typeStartEnd = "start" | "end";
 
+  interface imageProps {
+    name: string;
+    image: typeImage;
+  }
   interface iconProps {
     name: string;
-    image: ImageIcons;
+    image: imageIcons;
   }
   interface filterOptionsProps {
     name: string;
@@ -19,6 +24,20 @@ const shop = () => {
   interface brandsProps {
     name: string;
     isChecked: boolean;
+  }
+  interface productsProps {
+    id: number;
+    name: string;
+    brand: string;
+    price: number;
+    promotion: number;
+    isNew: boolean;
+    isOut: boolean;
+  }
+
+  const fetchingImage: imageProps = {
+    name: "fetching",
+    image: require("@/public/images/fetching.jpg"),
   }
 
   const filterIcon: iconProps = {
@@ -191,6 +210,9 @@ const shop = () => {
   const [startPrice, setStartPrice] = useState<number>(0);
   const [endPrice, setEndPrice] = useState<number>(0);
 
+  const [products, setProducts] = useState<Array<productsProps>>([]);
+  const [productsAmout, setProductsAmount] = useState<number>(0);
+
   const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절", "할인중"];
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
     {
@@ -288,11 +310,13 @@ const shop = () => {
   }
 
   useEffect(() => {
-    // fetch("http://localhost/data/productsData.json", {
-    //   method: "GET",
-    // }).then ((res) => res.json()).then((data) => {
-    //   console.log(...data)
-    // });
+    fetch("http://localhost:3000/products?_page=1").then((res) => res.json()).then((data) => {
+      setProductsAmount(data.item);
+    });
+
+    fetch("http://localhost:3000/products?_limit=50&_page=1").then((res) => res.json()).then((data) => {
+      setProducts(data);
+    });
 
     setBrands([...brands,
       {
@@ -387,6 +411,49 @@ const shop = () => {
         </div>
       </div>
       <div className={style.products}>
+        <div className={style.productsSection}>
+          <div className={style.productsList}>
+            {
+              products.map((product, index) => (
+                <div className={style.product} key={index}>
+                  <div className={style.productImage}>
+                    <Image src={fetchingImage.image} alt={fetchingImage.name} />
+                  </div>
+                  <div className={style.productDescription}>
+                    <div className={style.productText}>
+                      <div className={style.productBrand}>
+                        <h6>{product.brand}</h6>
+                      </div>
+                      <div className={style.productName}>
+                        <h5>{product.name}</h5>
+                      </div>
+                    </div>
+                    {
+                      product.promotion > 0 ? (
+                        <div className={style.productValue}>
+                          <div className={style.productPrice}>
+                            <h5 className={style.productOriginalPrice}>{product.price.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}원</h5>
+                            <h5 className={style.productPromotion}>{product.promotion}%</h5>
+                          </div>
+                          <div>
+                            <h3>{(product.price - (product.price / product.promotion)).toFixed().toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}원</h3>
+                          </div>
+                        </div>
+                      )
+                      : (
+                        <div className={style.productValue}>
+                          <div>
+                            <h3>{product.price.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}원</h3>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
       </div>
     </div>
   );
