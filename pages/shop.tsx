@@ -191,7 +191,7 @@ const shop = () => {
   const [startPrice, setStartPrice] = useState<number>(0);
   const [endPrice, setEndPrice] = useState<number>(0);
 
-  const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절"];
+  const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절", "할인중"];
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
     {
       name: "신상",
@@ -202,17 +202,16 @@ const shop = () => {
       isToggled: false,
     },
     {
+      name: "할인중",
+      isToggled: false,
+    },
+    {
       name: "브랜드",
       isClicked: true,
       isToggled: false,
     },
     {
       name: "가격",
-      isClicked: false,
-      isToggled: false,
-    },
-    {
-      name: "프로모션",
       isClicked: false,
       isToggled: false,
     },
@@ -354,7 +353,6 @@ const shop = () => {
             expandFilter && (
               renderingFilter == "브랜드" ? filterBrand()
               : renderingFilter == "가격" ? filterPrice()
-              : renderingFilter == "프로모션" ? <div></div>
               : <div>Template Error</div>
             )
           }
