@@ -43,6 +43,7 @@
   filter: invert(0.8);
 }
 
+/* Filter */
 .filter {
   position: fixed;
   left: calc(50% - min(50% - 30px, 700px));
@@ -57,7 +58,7 @@
 }
 .expandedFilter {
   width: 500px;
-  height: 310px;
+  height: 260px;
   border-color: dimgray;
   background-color: white;
 }
@@ -75,11 +76,13 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   width: 100%;
   height: calc(100% - 41px);
   border-bottom: 1px solid dimgray;
 }
+
+/* Filter - Brand Tab */
 .select > .condition {
   display: flex;
   width: 100%;
@@ -152,16 +155,18 @@
 .brand input {
   cursor: pointer;
 }
+
+/* Filter - Price Tab */
 .select > .section {
   display: flex;
+  flex-direction: column;
   width: 100%;
 }
 .section > .setPrice {
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  width: 100%;
-  padding: 15px;
+  align-items: flex-start;
+  padding: 10px 15px;
 }
 .setPrice > .input {
   display: flex;
@@ -174,9 +179,10 @@
 }
 .setPrice > .input input {
   width: 50px;
-  padding: 5px 3px 0px 5px;
+  padding: 3px 3px 0px;
   border: none;
   border-bottom: 1px solid dimgray;
+  font-size: 16px;
   text-align: end;
   outline: none;
 }
@@ -190,9 +196,14 @@
 .setPrice > .button button:hover {
   box-shadow: 0px 0px 3px 0px dimgray;
 }
+.section > .choose {
+  padding: 10px 15px;
+}
+
+/* Filter - Options */
 .section > .option {
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   margin-top: auto;
 }
 .option > .button {

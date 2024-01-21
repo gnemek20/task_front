@@ -1,11 +1,11 @@
 import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 
 const shop = () => {
   type ImageIcons = string | StaticImport;
-  type minMax = "min" | "max";
+  type typeStartEnd = "start" | "end";
 
   interface iconProps {
     name: string;
@@ -54,7 +54,7 @@ const shop = () => {
     setExpandFilter(!expandFilter);
     setSearchBrands("");
   }
-  const clickedFilterOption = (name: filterOptionsProps["name"]) => {
+  const onclickFilterOption = (name: filterOptionsProps["name"]) => {
     if (exceptionFilterOptions.includes(name)) {
       filterOptions.map((option) => {
         if (option.name == name) {
@@ -70,6 +70,7 @@ const shop = () => {
       if (option.name == name) {
         option.isClicked = true;
         setFilterOptions([...filterOptions]);
+        setRenderingFilter(name);
       }
       else if (!exceptionFilterOptions.includes(option.name)) {
         option.isClicked = false;
@@ -116,25 +117,79 @@ const shop = () => {
     setIsCheckedBrands(!isCheckedBrands);
   }
 
-  const onChangePrices = (event: ChangeEvent<HTMLInputElement>, minMax: minMax) => {
+  const onChangePrices = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
     const clarifiedValue: string = value[0] == "0" ? value.replace("0", '') : value;
+    const price: number = clarifiedValue.length > 0 ? parseInt(clarifiedValue) : 0;
     event.target.value = clarifiedValue;
 
-    if (minMax == "min") setStartPrice(clarifiedValue == "" ? -1 : parseInt(clarifiedValue));
-    else if (minMax == "max") setEndPrice(clarifiedValue == "" ? -1 : parseInt(clarifiedValue));
+    if (startEnd == "start") {
+      setStartPrice(clarifiedValue == "" ? 0 : price);
+    }
+    else if (startEnd == "end") {
+      setEndPrice(clarifiedValue == "" ? 0 : price);
+    }
+
+    if (price + (startEnd == "start" ? endPrice : startPrice) > 0) {
+      filterOptions.map((option) => {
+        if (option.name == "가격") {
+          option.isToggled = true;
+          return;
+        }
+      });
+    }
+    else {
+      filterOptions.map((option) => {
+        option.isToggled = false;
+        return;
+      });
+    }
+
+    setFilterOptions([...filterOptions]);
   }
-  const onClickResetPrice = () => {
-    setStartPrice(-1);
-    setEndPrice(-1);
+  const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartEnd) => {
+    (event.target as HTMLInputElement).value = "";
+
+    if (startEnd == "start") setStartPrice(0);
+    else if (startEnd == "end") setEndPrice(0);
+
+    if ((startEnd == "start" ? endPrice : startPrice) > 0) {
+      filterOptions.map((option) => {
+        if (option.name == "가격") {
+          option.isToggled = true;
+          return;
+        }
+      });
+    }
+    else {
+      filterOptions.map((option) => {
+        option.isToggled = false;
+        return;
+      });
+    }
+
+    setFilterOptions([...filterOptions]);
+  }
+  const onClickResetPrices = () => {
+    setStartPrice(0);
+    setEndPrice(0);
+    filterOptions.map((option) => {
+      if (option.name == "가격") {
+        option.isToggled = false;
+        return;
+      }
+    });
+
+    setFilterOptions([...filterOptions]);
   }
 
   const [expandFilter, setExpandFilter] = useState<boolean>(false);
+  const [renderingFilter, setRenderingFilter] = useState<string>("브랜드");
   const [brands, setBrands] = useState<Array<brandsProps>>([]);
   const [searchBrands, setSearchBrands] = useState<string>("");
   const [isCheckedBrands, setIsCheckedBrands] = useState<boolean>(false);
-  const [startPrice, setStartPrice] = useState<number>(-1);
-  const [endPrice, setEndPrice] = useState<number>(-1);
+  const [startPrice, setStartPrice] = useState<number>(0);
+  const [endPrice, setEndPrice] = useState<number>(0);
 
   const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절"];
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
@@ -163,27 +218,6 @@ const shop = () => {
     },
   ]);
 
-  const clickedFilter = () => {
-    let returnTemplate: JSX.Element = (<div><h4>None Template</h4></div>);
-
-    filterOptions.map((option) => {
-      if (option.isClicked) {
-        switch (option.name) {
-          case "브랜드":
-            returnTemplate = filterBrand();
-            break;
-          case "가격":
-            returnTemplate = filterPrice();
-            break;
-          case "프로모션":
-            break;
-        }
-      }
-    });
-
-    return returnTemplate;
-  }
-
   const filterBrand = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
@@ -194,7 +228,7 @@ const shop = () => {
                 <Image src={searchIcon.image} alt={searchIcon.name} />
               </div>
               <div className={style.input}>
-                <input type="text" onChange={(event) => onChangeSearchBrands(event)} />
+                <input id="searchBrands" type="text" onChange={(event) => onChangeSearchBrands(event)} autoComplete="off" />
               </div>
             </div>
             <div className={`${style.status} ${isCheckedBrands && style.toggledStatus}`} onClick={onclickStatusBrands}>
@@ -209,7 +243,7 @@ const shop = () => {
                 !isCheckedBrands || brand.isChecked ? (
                   <div className={style.brand} key={index}>
                     <label>
-                      <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} />
+                      <input id={`brandsCheckbox${index}`} type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} autoComplete="off" />
                       <h4>{brand.name}</h4>
                     </label>
                   </div>
@@ -231,16 +265,22 @@ const shop = () => {
           <div className={style.setPrice}>
             <div className={style.input}>
               <div>
-                <input type="text" value={startPrice > 0 ? startPrice : ""} onChange={(event) => onChangePrices(event, "min")} />
+                <input id="startPrice" type="text" value={(startPrice > 0 ? startPrice : "") || ""} onClick={(event) => onClickPrices(event, "start")} onChange={(event) => onChangePrices(event, "start")} autoComplete="off" />
                 <h4>만원부터</h4>
               </div>
+              <div className="none">
+                {/* 2번째 태그에 value가 포함된 input 태그를 작성하면 에러가 나요. */}
+                {/* 발생 이유는 모르겠어요 😢 */}
+                {/* Error: A component is changing an uncontrolled input to be controlled. */}
+                {/* <input type="text" value={123} /> */}
+              </div>
               <div>
-                <input type="text" value={endPrice > 0 ? endPrice : ""} onChange={(event) => onChangePrices(event, "max")} />
+                <input id="endPrice" type="text" value={(endPrice > 0 ? endPrice : "") || ""} onClick={(event) => onClickPrices(event, "end")} onChange={(event) => onChangePrices(event, "end")} autoComplete="off" />
                 <h4>만원까지</h4>
               </div>
             </div>
             <div className={style.button}>
-              <button onClick={onClickResetPrice}>초기화</button>
+              <button onClick={onClickResetPrices}>초기화</button>
             </div>
           </div>
         </div>
@@ -312,7 +352,10 @@ const shop = () => {
         <div className={`${style.section} ${expandFilter && style.expandedSection}`}>
           {
             expandFilter && (
-              clickedFilter()
+              renderingFilter == "브랜드" ? filterBrand()
+              : renderingFilter == "가격" ? filterPrice()
+              : renderingFilter == "프로모션" ? <div></div>
+              : <div>Template Error</div>
             )
           }
           <div className={style.option}>
@@ -331,7 +374,7 @@ const shop = () => {
               expandFilter && (
                 <div className={`${style.options} ${style.fadeIn}`}>
                   {filterOptions.map((option, index) => (
-                    <h4 className={`${option.isClicked && style.clickedOption} ${option.isToggled && style.toggledOption}`} onClick={() => clickedFilterOption(option.name)} key={index}>{option.name}</h4>
+                    <h4 className={`${option.isClicked && style.clickedOption} ${option.isToggled && style.toggledOption}`} onClick={() => onclickFilterOption(option.name)} key={index}>{option.name}</h4>
                   ))}
                 </div>
               )
