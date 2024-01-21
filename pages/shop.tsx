@@ -288,6 +288,12 @@ const shop = () => {
   }
 
   useEffect(() => {
+    fetch("http://localhost/data/productsData.json", {
+      method: "GET",
+    }).then ((res) => {
+      console.log(res)
+    });
+
     setBrands([...brands,
       {
         name: "Nike",
@@ -379,6 +385,8 @@ const shop = () => {
             }
           </div>
         </div>
+      </div>
+      <div className={style.products}>
       </div>
     </div>
   );
