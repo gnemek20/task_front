@@ -5,6 +5,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 
 const shop = () => {
   type ImageIcons = string | StaticImport;
+  type minMax = "min" | "max";
 
   interface iconProps {
     name: string;
@@ -76,7 +77,7 @@ const shop = () => {
       }
     });
   }
-  const clickedBrand = (name: brandsProps["name"]) => {
+  const onclickBrand = (name: brandsProps["name"]) => {
     let checked = false;
     brands.map((brand) => {
       if (brand.name == name) {
@@ -111,14 +112,29 @@ const shop = () => {
   const onChangeSearchBrands = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchBrands(event.target.value);
   }
-  const clickedStatusBrands = () => {
+  const onclickStatusBrands = () => {
     setIsCheckedBrands(!isCheckedBrands);
+  }
+
+  const onChangePrices = (event: ChangeEvent<HTMLInputElement>, minMax: minMax) => {
+    const value: string = event.target.value.replace(/[^0-9]/g, '');
+    const clarifiedValue: string = value[0] == "0" ? value.replace("0", '') : value;
+    event.target.value = clarifiedValue;
+
+    if (minMax == "min") setStartPrice(clarifiedValue == "" ? -1 : parseInt(clarifiedValue));
+    else if (minMax == "max") setEndPrice(clarifiedValue == "" ? -1 : parseInt(clarifiedValue));
+  }
+  const onClickResetPrice = () => {
+    setStartPrice(-1);
+    setEndPrice(-1);
   }
 
   const [expandFilter, setExpandFilter] = useState<boolean>(false);
   const [brands, setBrands] = useState<Array<brandsProps>>([]);
   const [searchBrands, setSearchBrands] = useState<string>("");
   const [isCheckedBrands, setIsCheckedBrands] = useState<boolean>(false);
+  const [startPrice, setStartPrice] = useState<number>(-1);
+  const [endPrice, setEndPrice] = useState<number>(-1);
 
   const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절"];
   const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
@@ -181,7 +197,7 @@ const shop = () => {
                 <input type="text" onChange={(event) => onChangeSearchBrands(event)} />
               </div>
             </div>
-            <div className={`${style.status} ${isCheckedBrands && style.toggledStatus}`} onClick={clickedStatusBrands}>
+            <div className={`${style.status} ${isCheckedBrands && style.toggledStatus}`} onClick={onclickStatusBrands}>
               <h4>체크된 것만 보기</h4>
             </div>
           </div>
@@ -193,7 +209,7 @@ const shop = () => {
                 !isCheckedBrands || brand.isChecked ? (
                   <div className={style.brand} key={index}>
                     <label>
-                      <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => clickedBrand(brand.name)} />
+                      <input id="brand" type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} />
                       <h4>{brand.name}</h4>
                     </label>
                   </div>
@@ -211,7 +227,23 @@ const shop = () => {
   const filterPrice = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
-
+        <div className={style.section}>
+          <div className={style.setPrice}>
+            <div className={style.input}>
+              <div>
+                <input type="text" value={startPrice > 0 ? startPrice : ""} onChange={(event) => onChangePrices(event, "min")} />
+                <h4>만원부터</h4>
+              </div>
+              <div>
+                <input type="text" value={endPrice > 0 ? endPrice : ""} onChange={(event) => onChangePrices(event, "max")} />
+                <h4>만원까지</h4>
+              </div>
+            </div>
+            <div className={style.button}>
+              <button onClick={onClickResetPrice}>초기화</button>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
