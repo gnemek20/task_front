@@ -122,7 +122,6 @@
   border-radius: 5px;
   border-bottom-right-radius: 0px;
   filter: invert(0.8);
-  transition: 200ms;
 }
 .section > .status:hover {
   filter: invert(0);
@@ -216,6 +215,7 @@
   cursor: pointer;
   padding: 10px 5px;
   filter: invert(0.8);
+  transition: 200ms;
 }
 .options > *:hover {
   filter: invert(0);
