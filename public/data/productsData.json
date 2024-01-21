@@ -1,5 +1,12 @@
-[
-  {
-    "name": "name"
-  }
-]
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "name"
+    },
+    {
+      "id": 2,
+      "name": "yop"
+    }
+  ]
+}

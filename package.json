@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "json": "json-server --watch ./public/data/productsData.json",
     "dev": "next dev -p 80",
     "build": "next build",
     "start": "next start",

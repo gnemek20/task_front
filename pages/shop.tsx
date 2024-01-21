@@ -290,8 +290,8 @@ const shop = () => {
   useEffect(() => {
     fetch("http://localhost/data/productsData.json", {
       method: "GET",
-    }).then ((res) => {
-      console.log(res)
+    }).then ((res) => res.json()).then((data) => {
+      console.log(...data)
     });
 
     setBrands([...brands,
