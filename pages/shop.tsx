@@ -612,6 +612,8 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
           }
         </div>
       </div>
+      <div className={style.footer}>
+      </div>
     </div>
   );
 };
