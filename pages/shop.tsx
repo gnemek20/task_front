@@ -488,6 +488,14 @@ const shop = (serverSideProps: any) => {
       </div>
       <div className={style.products}>
         <div className={style.productsSection}>
+          <div className={style.productListState}>
+            <div>
+              <h4>{productQuantity}개의 결과</h4>
+            </div>
+            <div>
+              <h4>추천순</h4>
+            </div>
+          </div>
           <div className={style.productsList}>
             {
               showingProductList.map((product, index) => (
@@ -498,7 +506,7 @@ const shop = (serverSideProps: any) => {
                   <div className={style.productDescription}>
                     <div className={style.productText}>
                       <div className={style.productName}>
-                        <h6>{product.name}</h6>
+                        <h4>{product.name}</h4>
                       </div>
                     </div>
                     {
