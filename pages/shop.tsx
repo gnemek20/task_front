@@ -327,8 +327,10 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     }
     else {
       filterOptionList.map((filter) => {
-        filter.isToggled = false;
-        deleteFromToggledFilterList(filter.name);
+        if (filter.name == "가격") {
+          filter.isToggled = false;
+          deleteFromToggledFilterList(filter.name);
+        }
       });
     }
 
@@ -568,6 +570,14 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
             }
           </div>
           {
+            showingProductList.length === 0 ? (
+              <div>
+                <h4>검색된 상품이 없어요 :(</h4>
+              </div>
+            )
+            : ''
+          }
+          {
             ((searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity) && searchingWord.length === 0 ? (
               <div className={style.showMoreProductList}>
                 <div className={style.showMoreProductListButton} ref={showMoreButtonRef}>
@@ -577,11 +587,12 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
                 </div>
               </div>
             )
-            : (
+            : showingProductList.length > 0 ? (
               <div className={style.showMoreProductList}>
                 <h4>END :)</h4>
               </div>
             )
+            : ''
           }
         </div>
       </div>
