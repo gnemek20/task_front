@@ -374,6 +374,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
     if (searchingWord.length > 0) {
       list = list.filter((product) => product.name.toUpperCase().includes(searchingWord.toUpperCase()));
+      shopPageRef.current?.scrollIntoView();
     }
     
     setShowingProductList(list);
@@ -510,7 +511,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         <div className={style.productsSection}>
           <div className={style.productListState}>
             <div>
-              <h4>{productQuantity}개의 결과</h4>
+              <h4>{searchingWord.length === 0 ? productQuantity : showingProductList.length}개의 결과</h4>
             </div>
             <div>
               <h4>추천순</h4>
