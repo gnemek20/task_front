@@ -1,41 +1,132 @@
 import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useState, useRef } from "react";
 
 const shop = () => {
+  // type
   type typeImage = StaticImport;
-  type imageIcons = string | StaticImport;
-  type typeStartEnd = "start" | "end";
+  type typeImageIcons = string | StaticImport;
+  type typeStartOrEnd = "start" | "end";
+  type typeBrandName = "Nike" | "Louis Vuitton" | "Chanel" | "Gucci" | "Adidas" | "Rolex" | "Dior" | "Zara";
+  type typeFilterOptionName = "신상" | "품절" | "할인중" | "가격" | "브랜드" | "검색어";
 
+  // interface
   interface imageProps {
     name: string;
     image: typeImage;
   }
   interface iconProps {
     name: string;
-    image: imageIcons;
+    image: typeImageIcons;
   }
-  interface filterOptionsProps {
-    name: string;
+  interface filterOptionProps {
+    name: typeFilterOptionName;
     isClicked?: boolean;
     isToggled: boolean;
   }
-  interface brandsProps {
-    name: string;
+  interface brandProps {
+    name: typeBrandName;
     isChecked: boolean;
   }
-  interface productsProps {
+  interface productProps {
     id: number;
     name: string;
-    brand: string;
+    brand: typeBrandName;
     price: number;
     promotion: number;
     isNew: boolean;
     isOut: boolean;
   }
 
-  const fetchingImage: imageProps = {
+  // ref
+  const shopPageRef = useRef<HTMLDivElement>(null);
+
+  // const
+  const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
+  const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("브랜드");
+  const [clickedFilterList, setClickedFilterList] = useState<Array<typeFilterOptionName>>([]);
+  const [toggledFilterList, setToggledFilterList] = useState<Array<typeFilterOptionName>>([]);
+  const haventIsClickedFilterOptionList: Array<typeFilterOptionName> = ["신상", "품절", "할인중"];
+  const [filterOptionList, setFilterOptionList] = useState<Array<filterOptionProps>>([
+    {
+      name: "신상",
+      isToggled: false,
+    },
+    {
+      name: "품절",
+      isToggled: false,
+    },
+    {
+      name: "할인중",
+      isToggled: false,
+    },
+    {
+      name: "가격",
+      isClicked: false,
+      isToggled: false,
+    },
+    {
+      name: "브랜드",
+      isClicked: true,
+      isToggled: false,
+    },
+    {
+      name: "검색어",
+      isClicked: false,
+      isToggled: false,
+    }
+  ]);
+  
+  const [isShowingCheckedBrandList, setIsShowingCheckedBrandList] = useState<boolean>(false);
+  const [searchingBrandName, setSearchingBrandName] = useState<string>("");
+  const [checkedBrandList, setCheckedBrandList] = useState<Array<typeBrandName>>([]);
+  const [brandList, setBrandList] = useState<Array<brandProps>>([
+    {
+      name: "Nike",
+      isChecked: false,
+    },
+    {
+      name: "Louis Vuitton",
+      isChecked: false,
+    },
+    {
+      name: "Chanel",
+      isChecked: false,
+    },
+    {
+      name: "Gucci",
+      isChecked: false,
+    },
+    {
+      name: "Adidas",
+      isChecked: false,
+    },
+    {
+      name: "Rolex",
+      isChecked: false,
+    },
+    {
+      name: "Dior",
+      isChecked: false,
+    },
+    {
+      name: "Zara",
+      isChecked: false,
+    },
+  ]);
+
+  const [startPrice, setStartPrice] = useState<number>(0);
+  const [endPrice, setEndPrice] = useState<number>(0);
+
+  const [productList, setProductList] = useState<Array<productProps>>([]);
+  const [showingProductList, setShowingProductList] = useState<Array<productProps>>([]);
+  const [productQuantity, setProductQuantity] = useState<number>(0);
+  const [searchingProductListPage, setSearchingProductListPage] = useState<number>(0);
+  const searchingProductQuantity: number = 51;
+
+  // image
+  const fetchingLogoImage: imageProps = {
     name: "fetching",
     image: require("@/public/images/fetching.jpg"),
   }
@@ -44,13 +135,13 @@ const shop = () => {
     name: "filter",
     image: require("@/public/icons/filterIcon.svg"),
   }
+
   const searchIcon: iconProps = {
     name: "search",
     image: require("@/public/icons/searchIcon.svg"),
   }
 
-  const categories: string[] = ["전체", "의류", "신발", "악세서리"];
-  const states: iconProps[] = [
+  const stateIcons: iconProps[] = [
     {
       name: "search",
       image: require("@/public/icons/searchIcon.svg"),
@@ -65,46 +156,107 @@ const shop = () => {
     },
   ]
 
+  // method
   const reload = () => {
+    // 현재 페이지를 다시 불러옵니다.
     window.location.reload();
   }
 
-  const clickedFilterButton = () => {
-    setExpandFilter(!expandFilter);
-    setSearchBrands("");
+  const addToToggledFilterList = (filterName: typeFilterOptionName) => {
+    if (!toggledFilterList.includes(filterName)) setToggledFilterList([...toggledFilterList, filterName]);
   }
-  const onclickFilterOption = (name: filterOptionsProps["name"]) => {
-    if (exceptionFilterOptions.includes(name)) {
-      filterOptions.map((option) => {
-        if (option.name == name) {
-          option.isToggled = !option.isToggled;
+  const deleteFromToggledFilterList = (filterName: typeFilterOptionName) => {
+    if (toggledFilterList.includes(filterName)) setToggledFilterList(toggledFilterList.filter((toggledFilter) => toggledFilter !== filterName));
+  }
+
+  const addToCheckedBrandList = (brandName: typeBrandName) => {
+    if (!checkedBrandList.includes(brandName)) setCheckedBrandList([...checkedBrandList, brandName]);
+  }
+  const deleteFromCheckedBrandList = (brandName: typeBrandName) => {
+    if (checkedBrandList.includes(brandName)) setCheckedBrandList(checkedBrandList.filter((checkedBrand) => checkedBrand !== brandName));
+  }
+
+  const makeQuery = (tFilterList: Array<typeFilterOptionName>, sPrice: number, ePrice: number) => {
+    let query: string = "";
+    const priceScale: number = 10000;
+
+    tFilterList.map((filter) => {
+      if (filter === "신상") {
+        query = [query, "isNew=true"].join("&");
+      }
+      else if (filter === "할인중") {
+        query = [query, "promotion_ne=0"].join("&");
+      }
+      else if (filter === "가격") {
+        if (sPrice == 0) {
+          query = [query, `price_lte=${ePrice * priceScale}`].join("&");
+        }
+        else if (ePrice == 0) {
+          query = [query, `price_gte=${sPrice * priceScale}`].join("&");
+        }
+        else if (sPrice > ePrice) {
+          query = [query, `price_gte=${ePrice * priceScale}`].join("&");
+          query = [query, `price_lte=${sPrice * priceScale}`].join("&");
+        }
+        else {
+          query = [query, `price_gte=${sPrice * priceScale}`].join("&");
+          query = [query, `price_lte=${ePrice * priceScale}`].join("&");
+        }
+      }
+    });
+
+    if (!tFilterList.includes("품절")) query = [query, "isOut=false"].join("&");
+
+    return query;
+  }
+
+  // onClick method
+  const onClickFilterButton = () => {
+    // 필터 버튼을 클릭하면 필터를 펼치거나 축소합니다.
+    setIsExpandedFilter(!isExpandedFilter);
+    setSearchingBrandName("");
+  }
+
+  const onclickFilterOption = (filterName: typeFilterOptionName) => {
+    if (haventIsClickedFilterOptionList.includes(filterName)) {
+      filterOptionList.map((filter) => {
+        if (filter.name == filterName) {
+          filter.isToggled = !filter.isToggled;
+          setFilterOptionList([...filterOptionList]);
+
+          if (filter.isToggled) addToToggledFilterList(filterName);
+          else deleteFromToggledFilterList(filterName);
         }
       });
-      setFilterOptions([...filterOptions]);
 
       return;
     }
 
-    filterOptions.map((option) => {
-      if (option.name == name) {
-        option.isClicked = true;
-        setFilterOptions([...filterOptions]);
-        setRenderingFilter(name);
+    filterOptionList.map((filter) => {
+      if (filter.name == filterName) {
+        filter.isClicked = true;
+        setFilterOptionList([...filterOptionList]);
+        setShowingFilter(filterName);
       }
-      else if (!exceptionFilterOptions.includes(option.name)) {
-        option.isClicked = false;
-        setFilterOptions([...filterOptions]);
+      else if (!haventIsClickedFilterOptionList.includes(filter.name)) {
+        filter.isClicked = false;
+        setFilterOptionList([...filterOptionList]);
       }
     });
   }
-  const onclickBrand = (name: brandsProps["name"]) => {
-    let checked = false;
-    brands.map((brand) => {
-      if (brand.name == name) {
-        brand.isChecked = !brand.isChecked;
-        setBrands([...brands]);
 
-        if (brand.isChecked) checked = true;
+  const onclickBrand = (brandName: typeBrandName) => {
+    let checked = false;
+    brandList.map((brand) => {
+      if (brand.name == brandName) {
+        brand.isChecked = !brand.isChecked;
+        setBrandList([...brandList]);
+
+        if (brand.isChecked) {
+          addToCheckedBrandList(brandName);
+          checked = true;
+        }
+        else deleteFromCheckedBrandList(brandName);
       }
       else if (!checked && brand.isChecked) {
         checked = true;
@@ -112,31 +264,88 @@ const shop = () => {
     });
 
     if (checked) {
-      filterOptions.map((option) => {
-        if (option.name == "브랜드") {
-          option.isToggled = true;
+      filterOptionList.map((filter) => {
+        if (filter.name == "브랜드") {
+          filter.isToggled = true;
+          addToToggledFilterList(filter.name);
         }
       });
     }
     else {
-      filterOptions.map((option) => {
-        if (option.name == "브랜드") {
-          option.isToggled = false;
+      filterOptionList.map((filter) => {
+        if (filter.name == "브랜드") {
+          filter.isToggled = false;
+          deleteFromToggledFilterList(filter.name);
         }
       });
     }
 
-    setFilterOptions([...filterOptions]);
+    setFilterOptionList([...filterOptionList]);
   }
 
-  const onChangeSearchBrands = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchBrands(event.target.value);
-  }
-  const onclickStatusBrands = () => {
-    setIsCheckedBrands(!isCheckedBrands);
+  const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
+    (event.target as HTMLInputElement).value = "";
+
+    if (startEnd == "start") setStartPrice(0);
+    else if (startEnd == "end") setEndPrice(0);
+
+    if ((startEnd == "start" ? endPrice : startPrice) > 0) {
+      filterOptionList.map((filter) => {
+        if (filter.name == "가격") {
+          filter.isToggled = true;
+          addToToggledFilterList(filter.name);
+        }
+      });
+    }
+    else {
+      filterOptionList.map((filter) => {
+        if (filter.name == "가격") {
+          filter.isToggled = false;
+          deleteFromToggledFilterList(filter.name);
+        }
+      });
+    }
+
+    setFilterOptionList([...filterOptionList]);
   }
 
-  const onChangePrices = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartEnd) => {
+  const onClickResetPrices = () => {
+    setStartPrice(0);
+    setEndPrice(0);
+
+    filterOptionList.map((filter) => {
+      if (filter.name == "가격") {
+        filter.isToggled = false;
+        deleteFromToggledFilterList(filter.name);
+      }
+    });
+
+    setFilterOptionList([...filterOptionList]);
+  }
+
+  const onClickShowingCheckedBrandList = () => {
+    setIsShowingCheckedBrandList(!isShowingCheckedBrandList);
+  }
+
+  const onClickShowMoreProductListButton = () => {
+    const query: string = makeQuery(toggledFilterList, startPrice, endPrice);
+
+    fetch(["http://localhost:3000/products?",
+    `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
+    `&_end=${searchingProductQuantity * (searchingProductListPage + 2)}`,
+    `${query}`].join("")).then((res) => res.json()).then((data) => {
+      setProductList([...productList, ...data]);
+    });
+
+    setSearchingProductListPage(searchingProductListPage + 1);
+  }
+
+  // onChange method
+  const onChangeSearchingBrandName = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchingBrandName(event.target.value);
+  }
+
+  const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
     const clarifiedValue: string = value[0] == "0" ? value.replace("0", '') : value;
     const price: number = clarifiedValue.length > 0 ? parseInt(clarifiedValue) : 0;
@@ -150,95 +359,52 @@ const shop = () => {
     }
 
     if (price + (startEnd == "start" ? endPrice : startPrice) > 0) {
-      filterOptions.map((option) => {
-        if (option.name == "가격") {
-          option.isToggled = true;
-          return;
+      filterOptionList.map((filter) => {
+        if (filter.name == "가격") {
+          filter.isToggled = true;
+          addToToggledFilterList(filter.name);
         }
       });
     }
     else {
-      filterOptions.map((option) => {
-        option.isToggled = false;
-        return;
+      filterOptionList.map((filter) => {
+        filter.isToggled = false;
+        deleteFromToggledFilterList(filter.name);
       });
     }
 
-    setFilterOptions([...filterOptions]);
+    setFilterOptionList([...filterOptionList]);
   }
-  const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartEnd) => {
-    (event.target as HTMLInputElement).value = "";
 
-    if (startEnd == "start") setStartPrice(0);
-    else if (startEnd == "end") setEndPrice(0);
-
-    if ((startEnd == "start" ? endPrice : startPrice) > 0) {
-      filterOptions.map((option) => {
-        if (option.name == "가격") {
-          option.isToggled = true;
-          return;
-        }
-      });
-    }
-    else {
-      filterOptions.map((option) => {
-        option.isToggled = false;
-        return;
-      });
-    }
-
-    setFilterOptions([...filterOptions]);
-  }
-  const onClickResetPrices = () => {
-    setStartPrice(0);
-    setEndPrice(0);
-    filterOptions.map((option) => {
-      if (option.name == "가격") {
-        option.isToggled = false;
-        return;
-      }
+  // useEffect
+  useEffect(() => {
+    const query: string = makeQuery(toggledFilterList, startPrice, endPrice);
+    
+    fetch(`http://localhost:3000/products?_page=0&_per_page=0${query}`).then((res) => res.json()).then((data) => {
+      setProductQuantity(data.items);
     });
 
-    setFilterOptions([...filterOptions]);
-  }
+    fetch([`http://localhost:3000/products?`,
+    `_start=0`,
+    `&_end=${searchingProductQuantity}`,
+    `${query}`].join("")).then((res) => res.json()).then((data) => {
+      setProductList(data);
+      // shopPageRef.current?.scrollIntoView({behavior: "smooth"});
+      shopPageRef.current?.scrollIntoView();
+    });
+  }, [toggledFilterList, startPrice, endPrice]);
 
-  const [expandFilter, setExpandFilter] = useState<boolean>(false);
-  const [renderingFilter, setRenderingFilter] = useState<string>("브랜드");
-  const [brands, setBrands] = useState<Array<brandsProps>>([]);
-  const [searchBrands, setSearchBrands] = useState<string>("");
-  const [isCheckedBrands, setIsCheckedBrands] = useState<boolean>(false);
-  const [startPrice, setStartPrice] = useState<number>(0);
-  const [endPrice, setEndPrice] = useState<number>(0);
+  useEffect(() => {
+    let list: Array<productProps> = productList;
 
-  const [products, setProducts] = useState<Array<productsProps>>([]);
-  const [productsAmout, setProductsAmount] = useState<number>(0);
+    if (checkedBrandList.length > 0) {
+      list = list.filter((product) => checkedBrandList.includes(product.brand));
+    }
+    
+    setShowingProductList(list);
+  }, [productList, checkedBrandList]);
 
-  const exceptionFilterOptions: Array<filterOptionsProps["name"]> = ["신상", "품절", "할인중"];
-  const [filterOptions, setFilterOptions] = useState<Array<filterOptionsProps>>([
-    {
-      name: "신상",
-      isToggled: false,
-    },
-    {
-      name: "품절",
-      isToggled: false,
-    },
-    {
-      name: "할인중",
-      isToggled: false,
-    },
-    {
-      name: "브랜드",
-      isClicked: true,
-      isToggled: false,
-    },
-    {
-      name: "가격",
-      isClicked: false,
-      isToggled: false,
-    },
-  ]);
-
+  // component
   const filterBrand = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
@@ -249,19 +415,19 @@ const shop = () => {
                 <Image src={searchIcon.image} alt={searchIcon.name} />
               </div>
               <div className={style.input}>
-                <input id="searchBrands" type="text" onChange={(event) => onChangeSearchBrands(event)} autoComplete="off" />
+                <input id="searchBrands" type="text" onChange={(event) => onChangeSearchingBrandName(event)} autoComplete="off" />
               </div>
             </div>
-            <div className={`${style.status} ${isCheckedBrands && style.toggledStatus}`} onClick={onclickStatusBrands}>
+            <div className={`${style.status} ${isShowingCheckedBrandList && style.toggledStatus}`} onClick={onClickShowingCheckedBrandList}>
               <h4>체크된 것만 보기</h4>
             </div>
           </div>
         </div>
         <div className={style.brands}>
           {
-            brands.map((brand, index) => (
-              brand.name.toUpperCase().includes(searchBrands.toUpperCase()) ? (
-                !isCheckedBrands || brand.isChecked ? (
+            brandList.map((brand, index) => (
+              brand.name.toUpperCase().includes(searchingBrandName.toUpperCase()) ? (
+                !isShowingCheckedBrandList || brand.isChecked ? (
                   <div className={style.brand} key={index}>
                     <label>
                       <input id={`brandsCheckbox${index}`} type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} autoComplete="off" />
@@ -286,7 +452,7 @@ const shop = () => {
           <div className={style.setPrice}>
             <div className={style.input}>
               <div>
-                <input id="startPrice" type="text" value={(startPrice > 0 ? startPrice : "") || ""} onClick={(event) => onClickPrices(event, "start")} onChange={(event) => onChangePrices(event, "start")} autoComplete="off" />
+                <input id="startPrice" type="text" value={(startPrice > 0 ? startPrice : "") || ""} onClick={(event) => onClickPrices(event, "start")} onChange={(event) => onChangePrice(event, "start")} autoComplete="off" />
                 <h4>만원부터</h4>
               </div>
               <div className="none">
@@ -296,7 +462,7 @@ const shop = () => {
                 {/* <input type="text" value={123} /> */}
               </div>
               <div>
-                <input id="endPrice" type="text" value={(endPrice > 0 ? endPrice : "") || ""} onClick={(event) => onClickPrices(event, "end")} onChange={(event) => onChangePrices(event, "end")} autoComplete="off" />
+                <input id="endPrice" type="text" value={(endPrice > 0 ? endPrice : "") || ""} onClick={(event) => onClickPrices(event, "end")} onChange={(event) => onChangePrice(event, "end")} autoComplete="off" />
                 <h4>만원까지</h4>
               </div>
             </div>
@@ -309,87 +475,43 @@ const shop = () => {
     )
   }
 
-  useEffect(() => {
-    fetch("http://localhost:3000/products?_page=1").then((res) => res.json()).then((data) => {
-      setProductsAmount(data.item);
-    });
-
-    fetch("http://localhost:3000/products?_limit=50&_page=1").then((res) => res.json()).then((data) => {
-      setProducts(data);
-    });
-
-    setBrands([...brands,
-      {
-        name: "Nike",
-        isChecked: false,
-      },
-      {
-        name: "Louis Vuitton",
-        isChecked: false,
-      },
-      {
-        name: "Chanel",
-        isChecked: false,
-      },
-      {
-        name: "Gucci",
-        isChecked: false,
-      },
-      {
-        name: "Adidas",
-        isChecked: false,
-      },
-      {
-        name: "Rolex",
-        isChecked: false,
-      },
-      {
-        name: "Dior",
-        isChecked: false,
-      },
-      {
-        name: "Zara",
-        isChecked: false,
-      },
-    ]);
-  }, []);
-
+  // main
   return (
-    <div>
+    <div ref={shopPageRef}>
       <div className={style.header}>
         <div className={style.section}>
           <div className={style.title}>
             <h2 onClick={reload}>FETCHING</h2>
           </div>
           <div className={style.categories}>
-            {
+            {/* {
               categories.map((category, index) => (
                 <h4 key={index}>{category}</h4>
               ))
-            }
+            } */}
           </div>
           <div className={style.state}>
               {
-                states.map((state, index) => (
+                stateIcons.map((state, index) => (
                   <Image key={index} src={state.image} alt={state.name} />
                 ))
               }
           </div>
         </div>
       </div>
-      <div className={`${style.filter} ${expandFilter && style.expandedFilter}`}>
-        <div className={`${style.section} ${expandFilter && style.expandedSection}`}>
+      <div className={`${style.filter} ${isExpandedFilter && style.expandedFilter}`}>
+        <div className={`${style.section} ${isExpandedFilter && style.expandedSection}`}>
           {
-            expandFilter && (
-              renderingFilter == "브랜드" ? filterBrand()
-              : renderingFilter == "가격" ? filterPrice()
+            isExpandedFilter && (
+              showingFilter == "브랜드" ? filterBrand()
+              : showingFilter == "가격" ? filterPrice()
               : <div>Template Error</div>
             )
           }
           <div className={style.option}>
-            <div className={style.button} onClick={clickedFilterButton}>
+            <div className={style.button} onClick={onClickFilterButton}>
               {
-                !expandFilter ? (
+                !isExpandedFilter ? (
                   <h4>필터</h4>
                 )
                 : (
@@ -399,10 +521,10 @@ const shop = () => {
               <Image src={filterIcon.image} alt={filterIcon.name} />
             </div>
             {
-              expandFilter && (
+              isExpandedFilter && (
                 <div className={`${style.options} ${style.fadeIn}`}>
-                  {filterOptions.map((option, index) => (
-                    <h4 className={`${option.isClicked && style.clickedOption} ${option.isToggled && style.toggledOption}`} onClick={() => onclickFilterOption(option.name)} key={index}>{option.name}</h4>
+                  {filterOptionList.map((filter, index) => (
+                    <h4 className={`${filter.isClicked && style.clickedOption} ${filter.isToggled && style.toggledOption}`} onClick={() => onclickFilterOption(filter.name)} key={index}>{filter.name}</h4>
                   ))}
                 </div>
               )
@@ -414,10 +536,10 @@ const shop = () => {
         <div className={style.productsSection}>
           <div className={style.productsList}>
             {
-              products.map((product, index) => (
+              showingProductList.map((product, index) => (
                 <div className={style.product} key={index}>
                   <div className={style.productImage}>
-                    <Image src={fetchingImage.image} alt={fetchingImage.name} />
+                    <Image src={fetchingLogoImage.image} alt={fetchingLogoImage.name} />
                   </div>
                   <div className={style.productDescription}>
                     <div className={style.productText}>
@@ -453,6 +575,18 @@ const shop = () => {
               ))
             }
           </div>
+          {
+            (searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity ? (
+              <div className={style.showMoreProductList}>
+                <div className={style.showMoreProductListButton}>
+                  <button onClick={onClickShowMoreProductListButton}>
+                    <h4>더보기</h4>
+                  </button>
+                </div>
+              </div>
+            )
+            : ''
+          }
         </div>
       </div>
     </div>
