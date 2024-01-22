@@ -389,7 +389,7 @@ const shop = () => {
     `&_end=${searchingProductQuantity}`,
     `${query}`].join("")).then((res) => res.json()).then((data) => {
       setProductList(data);
-      // shopPageRef.current?.scrollIntoView({behavior: "smooth"});
+      setSearchingProductListPage(0);
       shopPageRef.current?.scrollIntoView();
     });
   }, [toggledFilterList, startPrice, endPrice]);
