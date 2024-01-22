@@ -199,6 +199,34 @@
   box-shadow: 0px 0px 3px 0px dimgray;
 }
 
+/* Filter - Search */
+.select .filterSearchSection {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+}
+.filterSearchSection .searchBox {
+  display: flex;
+  width: 300px;
+  padding-left: 5px;
+  border-bottom: 1px solid dimgray;
+}
+.searchBox .searchIcon {
+  display: flex;
+  align-items: center;
+}
+.searchIcon img {
+  width: 16px;
+  height: 16px;
+}
+.searchBox input {
+  width: 100%;
+  padding: 5px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+
 /* Filter - Options */
 .section > .option {
   display: flex;

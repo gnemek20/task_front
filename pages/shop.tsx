@@ -77,7 +77,10 @@ const shop = () => {
       isToggled: false,
     }
   ]);
-  
+
+  const [startPrice, setStartPrice] = useState<number>(0);
+  const [endPrice, setEndPrice] = useState<number>(0);
+
   const [isShowingCheckedBrandList, setIsShowingCheckedBrandList] = useState<boolean>(false);
   const [searchingBrandName, setSearchingBrandName] = useState<string>("");
   const [checkedBrandList, setCheckedBrandList] = useState<Array<typeBrandName>>([]);
@@ -116,8 +119,7 @@ const shop = () => {
     },
   ]);
 
-  const [startPrice, setStartPrice] = useState<number>(0);
-  const [endPrice, setEndPrice] = useState<number>(0);
+  const [searchingWord, setSearchingWord] = useState<string>("");
 
   const [productList, setProductList] = useState<Array<productProps>>([]);
   const [showingProductList, setShowingProductList] = useState<Array<productProps>>([]);
@@ -265,18 +267,12 @@ const shop = () => {
 
     if (checked) {
       filterOptionList.map((filter) => {
-        if (filter.name == "브랜드") {
-          filter.isToggled = true;
-          addToToggledFilterList(filter.name);
-        }
+        if (filter.name == "브랜드") filter.isToggled = true;
       });
     }
     else {
       filterOptionList.map((filter) => {
-        if (filter.name == "브랜드") {
-          filter.isToggled = false;
-          deleteFromToggledFilterList(filter.name);
-        }
+        if (filter.name == "브랜드") filter.isToggled = false;
       });
     }
 
@@ -338,6 +334,7 @@ const shop = () => {
     });
 
     setSearchingProductListPage(searchingProductListPage + 1);
+    console.log(productList);
   }
 
   // onChange method
@@ -376,6 +373,25 @@ const shop = () => {
     setFilterOptionList([...filterOptionList]);
   }
 
+  const onChangeSearchingWord = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchingWord(event.target.value);
+
+    if (event.target.value.length > 0) {
+      filterOptionList.map((filter) => {
+        if (filter.name === "검색어") {
+          filter.isToggled = true;
+        }
+      });
+    }
+    else {
+      filterOptionList.map((filter) => {
+        if (filter.name === "검색어") {
+          filter.isToggled = false;
+        }
+      });
+    }
+  }
+
   // useEffect
   useEffect(() => {
     const query: string = makeQuery(toggledFilterList, startPrice, endPrice);
@@ -400,9 +416,12 @@ const shop = () => {
     if (checkedBrandList.length > 0) {
       list = list.filter((product) => checkedBrandList.includes(product.brand));
     }
+    if (searchingWord.length > 0) {
+      list = list.filter((product) => product.name.toUpperCase().includes(searchingWord.toUpperCase()));
+    }
     
     setShowingProductList(list);
-  }, [productList, checkedBrandList]);
+  }, [productList, checkedBrandList, searchingWord]);
 
   // component
   const filterBrand = () => {
@@ -475,6 +494,21 @@ const shop = () => {
     )
   }
 
+  const filterSearch = () => {
+    return (
+      <div className={`${style.select} ${style.fadeIn}`}>
+        <div className={style.filterSearchSection}>
+          <div className={style.searchBox}>
+            <div className={style.searchIcon}>
+              <Image src={searchIcon.image} alt={searchIcon.name} />
+            </div>
+            <input type="text" value={searchingWord} onChange={(event) => onChangeSearchingWord(event)} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // main
   return (
     <div ref={shopPageRef}>
@@ -505,6 +539,7 @@ const shop = () => {
             isExpandedFilter && (
               showingFilter == "브랜드" ? filterBrand()
               : showingFilter == "가격" ? filterPrice()
+              : showingFilter == "검색어" ? filterSearch()
               : <div>Template Error</div>
             )
           }
