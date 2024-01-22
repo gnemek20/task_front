@@ -55,7 +55,7 @@
 .filter {
   position: fixed;
   left: calc(50% - min(50% - 30px, 700px));
-  bottom: 50px;
+  bottom: 30px;
   width: 92px;
   height: 41px;
   border: 1px solid black;
@@ -315,7 +315,7 @@
   cursor: pointer;
   position: fixed;
   right: calc(50% - min(50% - 30px, 700px));
-  bottom: 50px;
+  bottom: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -464,5 +464,15 @@
   }
   .productImage {
     height: 200vw;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .productsList {
+    grid-template-columns: repeat(1, 1fr);
+    grid-auto-rows: 110vw;
+  }
+  .productImage {
+    height: 400vw;
   }
 }
