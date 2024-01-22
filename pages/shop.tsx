@@ -2,14 +2,15 @@ import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { ChangeEvent, MouseEvent, useEffect, useState, useRef } from "react";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
 
-const shop = () => {
+const shop = (serverSideProps: any) => {
   // type
   type typeImage = StaticImport;
   type typeImageIcons = string | StaticImport;
   type typeStartOrEnd = "start" | "end";
-  type typeBrandName = "Nike" | "Louis Vuitton" | "Chanel" | "Gucci" | "Adidas" | "Rolex" | "Dior" | "Zara";
-  type typeFilterOptionName = "신상" | "품절" | "할인중" | "가격" | "브랜드" | "검색어";
+  type typeFilterOptionName = "신상" | "품절" | "할인중" | "가격" | "검색어";
 
   // interface
   interface imageProps {
@@ -25,26 +26,25 @@ const shop = () => {
     isClicked?: boolean;
     isToggled: boolean;
   }
-  interface brandProps {
-    name: typeBrandName;
-    isChecked: boolean;
-  }
   interface productProps {
     id: number;
     name: string;
-    brand: typeBrandName;
     price: number;
     promotion: number;
     isNew: boolean;
     isOut: boolean;
   }
 
+  // router
+  const router = useRouter();
+  const routerAsPath = router.asPath;
+
   // ref
   const shopPageRef = useRef<HTMLDivElement>(null);
 
   // const
   const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
-  const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("브랜드");
+  const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("검색어");
   const [clickedFilterList, setClickedFilterList] = useState<Array<typeFilterOptionName>>([]);
   const [toggledFilterList, setToggledFilterList] = useState<Array<typeFilterOptionName>>([]);
   const haventIsClickedFilterOptionList: Array<typeFilterOptionName> = ["신상", "품절", "할인중"];
@@ -67,57 +67,14 @@ const shop = () => {
       isToggled: false,
     },
     {
-      name: "브랜드",
-      isClicked: true,
-      isToggled: false,
-    },
-    {
       name: "검색어",
-      isClicked: false,
+      isClicked: true,
       isToggled: false,
     }
   ]);
 
   const [startPrice, setStartPrice] = useState<number>(0);
   const [endPrice, setEndPrice] = useState<number>(0);
-
-  const [isShowingCheckedBrandList, setIsShowingCheckedBrandList] = useState<boolean>(false);
-  const [searchingBrandName, setSearchingBrandName] = useState<string>("");
-  const [checkedBrandList, setCheckedBrandList] = useState<Array<typeBrandName>>([]);
-  const [brandList, setBrandList] = useState<Array<brandProps>>([
-    {
-      name: "Nike",
-      isChecked: false,
-    },
-    {
-      name: "Louis Vuitton",
-      isChecked: false,
-    },
-    {
-      name: "Chanel",
-      isChecked: false,
-    },
-    {
-      name: "Gucci",
-      isChecked: false,
-    },
-    {
-      name: "Adidas",
-      isChecked: false,
-    },
-    {
-      name: "Rolex",
-      isChecked: false,
-    },
-    {
-      name: "Dior",
-      isChecked: false,
-    },
-    {
-      name: "Zara",
-      isChecked: false,
-    },
-  ]);
 
   const [searchingWord, setSearchingWord] = useState<string>("");
 
@@ -171,14 +128,7 @@ const shop = () => {
     if (toggledFilterList.includes(filterName)) setToggledFilterList(toggledFilterList.filter((toggledFilter) => toggledFilter !== filterName));
   }
 
-  const addToCheckedBrandList = (brandName: typeBrandName) => {
-    if (!checkedBrandList.includes(brandName)) setCheckedBrandList([...checkedBrandList, brandName]);
-  }
-  const deleteFromCheckedBrandList = (brandName: typeBrandName) => {
-    if (checkedBrandList.includes(brandName)) setCheckedBrandList(checkedBrandList.filter((checkedBrand) => checkedBrand !== brandName));
-  }
-
-  const makeQuery = (tFilterList: Array<typeFilterOptionName>, sPrice: number, ePrice: number) => {
+  const makeQueryString = (tFilterList: Array<typeFilterOptionName>, sPrice: number, ePrice: number) => {
     let query: string = "";
     const priceScale: number = 10000;
 
@@ -216,7 +166,6 @@ const shop = () => {
   const onClickFilterButton = () => {
     // 필터 버튼을 클릭하면 필터를 펼치거나 축소합니다.
     setIsExpandedFilter(!isExpandedFilter);
-    setSearchingBrandName("");
   }
 
   const onclickFilterOption = (filterName: typeFilterOptionName) => {
@@ -245,38 +194,6 @@ const shop = () => {
         setFilterOptionList([...filterOptionList]);
       }
     });
-  }
-
-  const onclickBrand = (brandName: typeBrandName) => {
-    let checked = false;
-    brandList.map((brand) => {
-      if (brand.name == brandName) {
-        brand.isChecked = !brand.isChecked;
-        setBrandList([...brandList]);
-
-        if (brand.isChecked) {
-          addToCheckedBrandList(brandName);
-          checked = true;
-        }
-        else deleteFromCheckedBrandList(brandName);
-      }
-      else if (!checked && brand.isChecked) {
-        checked = true;
-      }
-    });
-
-    if (checked) {
-      filterOptionList.map((filter) => {
-        if (filter.name == "브랜드") filter.isToggled = true;
-      });
-    }
-    else {
-      filterOptionList.map((filter) => {
-        if (filter.name == "브랜드") filter.isToggled = false;
-      });
-    }
-
-    setFilterOptionList([...filterOptionList]);
   }
 
   const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
@@ -319,12 +236,8 @@ const shop = () => {
     setFilterOptionList([...filterOptionList]);
   }
 
-  const onClickShowingCheckedBrandList = () => {
-    setIsShowingCheckedBrandList(!isShowingCheckedBrandList);
-  }
-
   const onClickShowMoreProductListButton = () => {
-    const query: string = makeQuery(toggledFilterList, startPrice, endPrice);
+    const query: string = makeQueryString(toggledFilterList, startPrice, endPrice);
 
     fetch(["http://localhost:3000/products?",
     `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
@@ -334,14 +247,9 @@ const shop = () => {
     });
 
     setSearchingProductListPage(searchingProductListPage + 1);
-    console.log(productList);
   }
 
   // onChange method
-  const onChangeSearchingBrandName = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchingBrandName(event.target.value);
-  }
-
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
     const clarifiedValue: string = value[0] == "0" ? value.replace("0", '') : value;
@@ -394,76 +302,31 @@ const shop = () => {
 
   // useEffect
   useEffect(() => {
-    const query: string = makeQuery(toggledFilterList, startPrice, endPrice);
-    
+    const query: string = makeQueryString(toggledFilterList, startPrice, endPrice);
+
     fetch(`http://localhost:3000/products?_page=0&_per_page=0${query}`).then((res) => res.json()).then((data) => {
       setProductQuantity(data.items);
     });
 
-    fetch([`http://localhost:3000/products?`,
-    `_start=0`,
-    `&_end=${searchingProductQuantity}`,
-    `${query}`].join("")).then((res) => res.json()).then((data) => {
-      setProductList(data);
-      setSearchingProductListPage(0);
-      shopPageRef.current?.scrollIntoView();
-    });
+    setSearchingProductListPage(0);
+    router.push(`/shop?${query}`, undefined, { shallow: false });
   }, [toggledFilterList, startPrice, endPrice]);
 
   useEffect(() => {
     let list: Array<productProps> = productList;
 
-    if (checkedBrandList.length > 0) {
-      list = list.filter((product) => checkedBrandList.includes(product.brand));
-    }
     if (searchingWord.length > 0) {
       list = list.filter((product) => product.name.toUpperCase().includes(searchingWord.toUpperCase()));
     }
     
     setShowingProductList(list);
-  }, [productList, checkedBrandList, searchingWord]);
+  }, [productList, searchingWord]);
+
+  useEffect(() => {
+    setProductList(serverSideProps.data);
+  }, [serverSideProps]);
 
   // component
-  const filterBrand = () => {
-    return (
-      <div className={`${style.select} ${style.fadeIn}`}>
-        <div className={style.condition}>
-          <div className={style.section}>
-            <div className={style.search}>
-              <div className={style.image}>
-                <Image src={searchIcon.image} alt={searchIcon.name} />
-              </div>
-              <div className={style.input}>
-                <input id="searchBrands" type="text" onChange={(event) => onChangeSearchingBrandName(event)} autoComplete="off" />
-              </div>
-            </div>
-            <div className={`${style.status} ${isShowingCheckedBrandList && style.toggledStatus}`} onClick={onClickShowingCheckedBrandList}>
-              <h4>체크된 것만 보기</h4>
-            </div>
-          </div>
-        </div>
-        <div className={style.brands}>
-          {
-            brandList.map((brand, index) => (
-              brand.name.toUpperCase().includes(searchingBrandName.toUpperCase()) ? (
-                !isShowingCheckedBrandList || brand.isChecked ? (
-                  <div className={style.brand} key={index}>
-                    <label>
-                      <input id={`brandsCheckbox${index}`} type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} autoComplete="off" />
-                      <h4>{brand.name}</h4>
-                    </label>
-                  </div>
-                )
-                : ''
-              )
-              : ''
-            ))
-          }
-        </div>
-      </div>
-    )
-  }
-
   const filterPrice = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
@@ -537,8 +400,7 @@ const shop = () => {
         <div className={`${style.section} ${isExpandedFilter && style.expandedSection}`}>
           {
             isExpandedFilter && (
-              showingFilter == "브랜드" ? filterBrand()
-              : showingFilter == "가격" ? filterPrice()
+              showingFilter == "가격" ? filterPrice()
               : showingFilter == "검색어" ? filterSearch()
               : <div>Template Error</div>
             )
@@ -578,11 +440,8 @@ const shop = () => {
                   </div>
                   <div className={style.productDescription}>
                     <div className={style.productText}>
-                      <div className={style.productBrand}>
-                        <h6>{product.brand}</h6>
-                      </div>
                       <div className={style.productName}>
-                        <h5>{product.name}</h5>
+                        <h6>{product.name}</h6>
                       </div>
                     </div>
                     {
@@ -611,7 +470,7 @@ const shop = () => {
             }
           </div>
           {
-            (searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity ? (
+            ((searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity) && searchingWord.length === 0 ? (
               <div className={style.showMoreProductList}>
                 <div className={style.showMoreProductListButton}>
                   <button onClick={onClickShowMoreProductListButton}>
@@ -629,3 +488,22 @@ const shop = () => {
 }
 
 export default shop;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const query = context.resolvedUrl.replace("/shop?", "");
+    const data = await fetch([`http://localhost:3000/products`,
+    `?_start=0`,
+    `&_end=51`,
+    `&${query}`].join("")).then((res) => res.json());
+  
+    return {
+      props: { data }
+    };
+  }
+  catch (error) {
+    return {
+      props: {}
+    };
+  }
+}
