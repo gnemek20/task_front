@@ -310,6 +310,13 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   const onClickEraseSearchingWord = () => {
     setSearchingWord("");
+
+    filterOptionList.map((filter) => {
+      if (filter.name === "검색어") {
+        filter.isToggled = false;
+      }
+    });
+    setFilterOptionList(filterOptionList);
   }
 
   // onChange method
@@ -538,9 +545,6 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
           <div className={style.productListState}>
             <div>
               <h4>{searchingWord.length === 0 ? productQuantity : showingProductList.length}개의 결과</h4>
-            </div>
-            <div>
-              <h4>추천순</h4>
             </div>
           </div>
           <div className={style.productsList}>
