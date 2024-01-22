@@ -531,7 +531,7 @@ const shop = (serverSideProps: any) => {
               <div className={style.showMoreProductList}>
                 <div className={style.showMoreProductListButton}>
                   <button onClick={onClickShowMoreProductListButton}>
-                    <h4>더보기</h4>
+                    <h4>더보기 ({searchingProductQuantity * (searchingProductListPage + 1)} / {productQuantity})</h4>
                   </button>
                 </div>
               </div>
