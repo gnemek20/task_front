@@ -455,3 +455,14 @@
     opacity: 1;
   }
 }
+
+@media screen and (max-width: 800px) {
+  .productsList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: calc(950px - (800px - 40vw));
+    gap: 45px 25px;
+  }
+  .productImage {
+    height: 200vw;
+  }
+}
