@@ -333,7 +333,7 @@ const shop = (serverSideProps: any) => {
       filterOptionList.map((filter) => {
         if (filter.name === "검색어") {
           filter.isToggled = true;
-          addToToggledFilterList(filter.name);
+          // addToToggledFilterList(filter.name);
         }
       });
     }
@@ -341,7 +341,7 @@ const shop = (serverSideProps: any) => {
       filterOptionList.map((filter) => {
         if (filter.name === "검색어") {
           filter.isToggled = false;
-          deleteFromToggledFilterList(filter.name);
+          // deleteFromToggledFilterList(filter.name);
         }
       });
     }
