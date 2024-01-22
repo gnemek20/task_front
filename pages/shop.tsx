@@ -475,7 +475,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   // main
   return (
-    <div ref={shopPageRef}>
+    <div className={style.shop} ref={shopPageRef}>
       <div className={style.header}>
         <div className={style.section}>
           <div className={style.title}>
