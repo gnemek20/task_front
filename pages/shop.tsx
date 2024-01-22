@@ -111,6 +111,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     image: require("@/public/icons/arrowUpIcon.svg"),
   }
 
+  const xIcon: iconProps = {
+    name: "x",
+    image: require("@/public/icons/xIcon.svg"),
+  }
+
   const stateIcons: Array<iconProps> = [
     {
       name: "search",
@@ -303,6 +308,10 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     shopPageRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  const onClickEraseSearchingWord = () => {
+    setSearchingWord("");
+  }
+
   // onChange method
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
@@ -444,10 +453,13 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       <div className={`${style.select} ${style.fadeIn}`}>
         <div className={style.filterSearchSection}>
           <div className={style.searchBox}>
-            <div className={style.searchIcon}>
+            <input type="text" value={searchingWord} onChange={(event) => onChangeSearchingWord(event)} />
+            <div className={style.imageIcon}>
               <Image src={searchIcon.image} alt={searchIcon.name} />
             </div>
-            <input type="text" value={searchingWord} onChange={(event) => onChangeSearchingWord(event)} />
+            <div className={style.imageIcon} onClick={onClickEraseSearchingWord}>
+              <Image src={xIcon.image} alt={xIcon.name} />
+            </div>
           </div>
         </div>
       </div>

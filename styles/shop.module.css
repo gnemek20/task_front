@@ -243,14 +243,16 @@
 .filterSearchSection .searchBox {
   display: flex;
   width: 300px;
-  padding-left: 5px;
   border-bottom: 1px solid dimgray;
 }
-.searchBox .searchIcon {
+.searchBox .imageIcon {
+  cursor: pointer;
   display: flex;
   align-items: center;
+  padding: 5px;
+  padding-bottom: 0px;
 }
-.searchIcon img {
+.imageIcon img {
   width: 16px;
   height: 16px;
 }
