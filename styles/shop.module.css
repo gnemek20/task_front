@@ -1,0 +1,496 @@
+.shop {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0px;
+  display: flex;
+  width: 100vw;
+  border-bottom: 1px solid black;
+  background-color: white;
+}
+.header > .section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 100%;
+  max-width: var(--max-width);
+  padding: 20px 30px;
+  margin: 0px auto;
+}
+.section > * {
+  display: flex;
+  align-items: center;
+}
+.section > .title {
+  cursor: pointer;
+}
+.section > .categories {
+  justify-content: center;
+  align-items: end;
+  gap: 20px;
+}
+.categories > * {
+  cursor: pointer;
+  padding: 3px;
+}
+.section > .state {
+  justify-content: end;
+  gap: 20px;
+}
+.state > * {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  padding: 5px;
+}
+
+/* Filter */
+.filter {
+  position: fixed;
+  left: calc(50% - min(50% - 30px, 700px));
+  bottom: 30px;
+  width: 92px;
+  height: 41px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: black;
+  transition: 300ms;
+  user-select: none;
+}
+.toggledFilter {
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.expandedFilter {
+  width: 500px;
+  height: 160px;
+  border-color: dimgray;
+  background-color: white;
+}
+.expandedToggledFilter {
+  border-bottom-right-radius: 0px;
+}
+.filter > .section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  filter: invert(1);
+}
+.filter > .expandedSection {
+  filter: invert(0);
+}
+.section > .select {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  height: calc(100% - 42px);
+  border-bottom: 1px solid dimgray;
+}
+
+/* Filter - Condition */
+.filter > .filterCondition {
+  cursor: pointer;
+  position: absolute;
+  bottom: -1px;
+  right: -43px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 41px;
+  height: 41px;
+  border: 1px solid coral;
+  border-left: 0px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  background-color: white;
+  color: coral;
+  transition: 300ms;
+}
+.filterCondition > img {
+  filter: invert(1);
+  width: 20px;
+  height: 20px;
+}
+
+/* Filter - Brand Tab */
+.select > .condition {
+  display: flex;
+  width: 100%;
+}
+.condition > .section {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 15px;
+}
+.section > .search {
+  display: flex;
+  width: 300px;
+  padding-left: 5px;
+  border-bottom: 1px solid dimgray;
+}
+.search > .input {
+  display: flex;
+  width: 100%;
+}
+.input > input {
+  width: 100%;
+  padding: 5px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+.search > .image {
+  display: flex;
+  align-items: center;
+}
+.image > img {
+  width: 16px;
+  height: 16px;
+}
+.section > .status {
+  cursor: pointer;
+  padding: 0px 3px;
+  border: 1px solid dimgray;
+  border-radius: 5px;
+  border-bottom-right-radius: 0px;
+  filter: invert(0.8);
+}
+.section > .toggledStatus {
+  filter: invert(0) !important;
+  color: coral !important;
+  border-color: coral !important;
+}
+.select > .brands {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  gap: 5px;
+}
+.brands > .brand {
+  display: flex;
+  padding: 0px 15px;
+}
+.brand > label {
+  cursor: pointer;
+  display: flex;
+  padding: 5px 5px;
+  gap: 10px;
+}
+.brand input {
+  cursor: pointer;
+}
+
+/* Filter - Price Tab */
+.select > .section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.section > .setPrice {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 15px;
+}
+.setPrice > .input {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.setPrice > .input > * {
+  display: flex;
+  width: 100%;
+}
+.setPrice > .input input {
+  width: 50px;
+  padding: 3px 3px 0px;
+  border: none;
+  border-bottom: 1px solid dimgray;
+  font-size: 16px;
+  text-align: end;
+  outline: none;
+}
+.setPrice > .button button {
+  cursor: pointer;
+  padding: 10px 15px;
+  border: 1px solid dimgray;
+  border-radius: 20px;
+  background-color: white;
+}
+
+/* Filter - Search */
+.select .filterSearchSection {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+}
+.filterSearchSection .searchBox {
+  display: flex;
+  width: 300px;
+  border-bottom: 1px solid dimgray;
+}
+.searchBox .imageIcon {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  padding-bottom: 0px;
+}
+.imageIcon img {
+  width: 16px;
+  height: 16px;
+}
+.searchBox input {
+  width: 100%;
+  padding: 5px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+
+/* Filter - Options */
+.section > .option {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: auto;
+}
+.option > .button {
+  cursor: pointer;
+  display: flex;
+  padding: 10px 15px;
+  gap: 10px;
+}
+.button > img {
+  width: 20px;
+  height: 20px;
+}
+.options {
+  position: absolute;
+  right: 0px;
+  display: flex;
+  gap: 10px;
+}
+.options > * {
+  cursor: pointer;
+  padding: 10px 5px;
+  filter: invert(0.8);
+  transition: 200ms;
+}
+.options > .clickedOption {
+  filter: invert(0);
+  color: black;
+}
+.options > .toggledOption {
+  filter: invert(0);
+  color: coral !important;
+}
+
+/* scrollToTop */
+.scrollToTop {
+  cursor: pointer;
+  position: fixed;
+  right: calc(50% - min(50% - 30px, 700px));
+  bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 41px;
+  height: 41px;
+  border: 1px solid black;
+  border-radius: 50%;
+  background-color: black;
+}
+.scrollToTop img {
+  filter: invert(1);
+  width: 20px;
+  height: 20px;
+}
+
+/* Products */
+.products {
+  display: flex;
+  padding: 92px 30px 20px;
+}
+.productsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0px auto;
+}
+.productListState {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+.productsList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: calc(min((100vw - 66vw - 60px) * 1.7, (1000px / 3) * 1.6));
+  width: 100%;
+  max-width: 1000px;
+  gap: 80px 25px;
+}
+.product {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.productImage {
+  display: flex;
+  min-height: calc(min((100vw - 66vw - 60px) * 1.25, (1000px / 3) * 1.25));
+  border: 1px solid dimgray;
+}
+.productImage > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.productDescription {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-top: 5px;
+}
+.productText {
+  display: flex;
+  flex-direction: column;
+}
+.productPrice {
+  display: flex;
+  gap: 5px;
+}
+.productOriginalPrice {
+  color: #cccccc;
+  text-decoration: line-through;
+}
+.productPromotion {
+  color: coral;
+}
+.productValue {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+}
+.showMoreProductList {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 100px;
+}
+.showMoreProductListButton {
+  display: flex;
+}
+.showMoreProductListButton > button {
+  cursor: pointer;
+  display: flex;
+  padding: 10px;
+  border: 1px solid dimgray;
+  background-color: white;
+  outline: none;
+  gap: 10px;
+  transition: 200ms;
+}
+.showMoreProductListButton button > h4 {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* footer */
+.footer {
+  width: 100%;
+  height: 250px;
+  margin-top: auto;
+  background-color: black;
+}
+
+.fadeIn {
+  animation: fadeIn;
+  animation-duration: 300ms;
+  animation-fill-mode: backwards;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .shop {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .productsList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: calc(950px - (800px - 40vw));
+    gap: 45px 25px;
+  }
+  .productImage {
+    height: 200vw;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .productsList {
+    grid-template-columns: repeat(1, 1fr);
+    grid-auto-rows: 110vw;
+  }
+  .productImage {
+    height: 400vw;
+  }
+  .filter {
+    left: 0;
+    bottom: 0;
+    width: calc(100% - 2px);
+  }
+  .scrollToTop {
+    display: none;
+  }
+  .filterCondition {
+    display: none;
+  }
+}
+
+@media (hover:hover) {
+  .state > *:hover {
+    filter: invert(0.8);
+  }
+  .filter > .filterCondition:hover {
+    background-color: coral;
+  }
+  .section > .status:hover {
+    filter: invert(0);
+  }
+  .setPrice > .button button:hover {
+    box-shadow: 0px 0px 3px 0px dimgray;
+  }
+  .options > *:hover {
+    filter: invert(0);
+  }
+  .scrollToTop:hover {
+    box-shadow: 0px 0px 5px 1px dimgray;
+  }
+  .showMoreProductListButton > button:hover {
+    border: 1px solid black;
+    background-color: black;
+    color: white;
+  }
+}
