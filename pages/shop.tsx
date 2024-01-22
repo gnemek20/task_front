@@ -2,10 +2,10 @@ import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { ChangeEvent, MouseEvent, useEffect, useState, useRef, memo, useCallback, forwardRef } from "react";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 
-const shop = (serverSideProps: any) => {
+const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   // type
   type typeImage = StaticImport;
   type typeImageIcons = string | StaticImport;
@@ -40,7 +40,7 @@ const shop = (serverSideProps: any) => {
 
   // ref
   const shopPageRef = useRef<HTMLDivElement>(null);
-  const lastProductRef = useRef<HTMLDivElement>(null);
+  const showMoreButtonRef = useRef<HTMLDivElement>(null);
 
   // const
   const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
@@ -385,15 +385,15 @@ const shop = (serverSideProps: any) => {
       root: null,
     });
 
-    if (lastProductRef.current) observer.observe(lastProductRef.current);
+    if (showMoreButtonRef.current) observer.observe(showMoreButtonRef.current);
 
     return () => {
       observer.disconnect();
     }
-  }, [intersect, lastProductRef.current]);
+  }, [intersect, showMoreButtonRef.current]);
 
   useEffect(() => {
-    setProductList(serverSideProps.data);
+    setProductList(serverSideProps.productList);
   }, [serverSideProps]);
 
   // component
@@ -557,7 +557,7 @@ const shop = (serverSideProps: any) => {
           {
             ((searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity) && searchingWord.length === 0 ? (
               <div className={style.showMoreProductList}>
-                <div className={style.showMoreProductListButton} ref={lastProductRef}>
+                <div className={style.showMoreProductListButton} ref={showMoreButtonRef}>
                   <button onClick={onClickShowMoreProductListButton}>
                     <h4>더보기 ({searchingProductQuantity * (searchingProductListPage + 1)} / {productQuantity})</h4>
                   </button>
@@ -581,13 +581,13 @@ export default memo(shop);
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const query = context.resolvedUrl.replace("/shop?", "");
-    const data = await fetch([`http://localhost:3000/products`,
+    const productList = await fetch([`http://localhost:3000/products`,
     `?_start=0`,
     `&_end=51`,
     `&${query}`].join("")).then((res) => res.json());
   
     return {
-      props: { data }
+      props: { productList }
     };
   }
   catch (error) {
