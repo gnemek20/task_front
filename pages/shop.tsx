@@ -1,7 +1,7 @@
 import Image from "next/image"
 import style from "@/styles/shop.module.css"
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { ChangeEvent, MouseEvent, useEffect, useState, useRef } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useState, useRef, memo, useCallback, forwardRef } from "react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
@@ -40,6 +40,7 @@ const shop = (serverSideProps: any) => {
 
   // ref
   const shopPageRef = useRef<HTMLDivElement>(null);
+  const lastProductRef = useRef<HTMLDivElement>(null);
 
   // const
   const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
@@ -125,6 +126,12 @@ const shop = (serverSideProps: any) => {
     // 현재 페이지를 다시 불러옵니다.
     window.location.reload();
   }
+
+  const intersect = useCallback(async ([entry]: IntersectionObserverEntry[]) => {
+    if (entry.isIntersecting) {
+      onClickShowMoreProductListButton();
+    }
+  }, [productList]);
 
   const addToToggledFilterList = (filterName: typeFilterOptionName) => {
     if (!toggledFilterList.includes(filterName)) setToggledFilterList([...toggledFilterList, filterName]);
@@ -241,10 +248,10 @@ const shop = (serverSideProps: any) => {
     setFilterOptionList([...filterOptionList]);
   }
 
-  const onClickShowMoreProductListButton = () => {
+  const onClickShowMoreProductListButton = async () => {
     const query: string = makeQueryString(toggledFilterList, startPrice, endPrice);
 
-    fetch(["http://localhost:3000/products?",
+    await fetch(["http://localhost:3000/products?",
     `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
     `&_end=${searchingProductQuantity * (searchingProductListPage + 2)}`,
     `${query}`].join("")).then((res) => res.json()).then((data) => {
@@ -371,6 +378,19 @@ const shop = (serverSideProps: any) => {
     
     setShowingProductList(list);
   }, [productList, searchingWord]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(intersect, {
+      threshold: 0.3,
+      root: null,
+    });
+
+    if (lastProductRef.current) observer.observe(lastProductRef.current);
+
+    return () => {
+      observer.disconnect();
+    }
+  }, [intersect, lastProductRef.current]);
 
   useEffect(() => {
     setProductList(serverSideProps.data);
@@ -537,22 +557,26 @@ const shop = (serverSideProps: any) => {
           {
             ((searchingProductQuantity * (searchingProductListPage + 1)) < productQuantity) && searchingWord.length === 0 ? (
               <div className={style.showMoreProductList}>
-                <div className={style.showMoreProductListButton}>
+                <div className={style.showMoreProductListButton} ref={lastProductRef}>
                   <button onClick={onClickShowMoreProductListButton}>
                     <h4>더보기 ({searchingProductQuantity * (searchingProductListPage + 1)} / {productQuantity})</h4>
                   </button>
                 </div>
               </div>
             )
-            : ''
+            : (
+              <div className={style.showMoreProductList}>
+                <h4>END :)</h4>
+              </div>
+            )
           }
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default shop;
+export default memo(shop);
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
