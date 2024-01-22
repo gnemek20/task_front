@@ -534,7 +534,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
               showingProductList.map((product, index) => (
                 <div className={style.product} key={index}>
                   <div className={style.productImage}>
-                    <Image src={fetchingLogoImage.image} alt={fetchingLogoImage.name} />
+                    <Image src={fetchingLogoImage.image} alt={fetchingLogoImage.name} priority />
                   </div>
                   <div className={style.productDescription}>
                     <div className={style.productText}>
