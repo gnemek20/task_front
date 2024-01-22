@@ -37,7 +37,6 @@ const shop = (serverSideProps: any) => {
 
   // router
   const router = useRouter();
-  const routerAsPath = router.asPath;
 
   // ref
   const shopPageRef = useRef<HTMLDivElement>(null);
@@ -45,7 +44,6 @@ const shop = (serverSideProps: any) => {
   // const
   const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
   const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("검색어");
-  const [clickedFilterList, setClickedFilterList] = useState<Array<typeFilterOptionName>>([]);
   const [toggledFilterList, setToggledFilterList] = useState<Array<typeFilterOptionName>>([]);
   const haventIsClickedFilterOptionList: Array<typeFilterOptionName> = ["신상", "품절", "할인중"];
   const [filterOptionList, setFilterOptionList] = useState<Array<filterOptionProps>>([
@@ -84,6 +82,8 @@ const shop = (serverSideProps: any) => {
   const [searchingProductListPage, setSearchingProductListPage] = useState<number>(0);
   const searchingProductQuantity: number = 51;
 
+  const [isMouseOveredFilterCondition, setIsMouseOveredFilterCondition] = useState<boolean>(false);
+
   // image
   const fetchingLogoImage: imageProps = {
     name: "fetching",
@@ -100,7 +100,12 @@ const shop = (serverSideProps: any) => {
     image: require("@/public/icons/searchIcon.svg"),
   }
 
-  const stateIcons: iconProps[] = [
+  const refreshIcon: iconProps = {
+    name: "refresh",
+    image: require("@/public/icons/refreshIcon.svg"),
+  }
+
+  const stateIcons: Array<iconProps> = [
     {
       name: "search",
       image: require("@/public/icons/searchIcon.svg"),
@@ -249,6 +254,39 @@ const shop = (serverSideProps: any) => {
     setSearchingProductListPage(searchingProductListPage + 1);
   }
 
+  const onClickRefreshFilterButton = () => {
+    setIsMouseOveredFilterCondition(false);
+    setStartPrice(0);
+    setEndPrice(0);
+    setSearchingWord("");
+    setShowingFilter("검색어");
+    setToggledFilterList([]);
+    setFilterOptionList([
+      {
+        name: "신상",
+        isToggled: false,
+      },
+      {
+        name: "품절",
+        isToggled: false,
+      },
+      {
+        name: "할인중",
+        isToggled: false,
+      },
+      {
+        name: "가격",
+        isClicked: false,
+        isToggled: false,
+      },
+      {
+        name: "검색어",
+        isClicked: true,
+        isToggled: false,
+      }
+    ]);
+  }
+
   // onChange method
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
@@ -288,6 +326,7 @@ const shop = (serverSideProps: any) => {
       filterOptionList.map((filter) => {
         if (filter.name === "검색어") {
           filter.isToggled = true;
+          addToToggledFilterList(filter.name);
         }
       });
     }
@@ -295,9 +334,20 @@ const shop = (serverSideProps: any) => {
       filterOptionList.map((filter) => {
         if (filter.name === "검색어") {
           filter.isToggled = false;
+          deleteFromToggledFilterList(filter.name);
         }
       });
     }
+  }
+
+  // onMouseEnter method
+  const onMouseEnterFilterCondition = () => {
+    setIsMouseOveredFilterCondition(true);
+  }
+
+  // onMouseLeave method
+  const onMouseLeaveFilterCondition = () => {
+    setIsMouseOveredFilterCondition(false);
   }
 
   // useEffect
@@ -380,13 +430,6 @@ const shop = (serverSideProps: any) => {
           <div className={style.title}>
             <h2 onClick={reload}>FETCHING</h2>
           </div>
-          <div className={style.categories}>
-            {/* {
-              categories.map((category, index) => (
-                <h4 key={index}>{category}</h4>
-              ))
-            } */}
-          </div>
           <div className={style.state}>
               {
                 stateIcons.map((state, index) => (
@@ -396,7 +439,7 @@ const shop = (serverSideProps: any) => {
           </div>
         </div>
       </div>
-      <div className={`${style.filter} ${isExpandedFilter && style.expandedFilter}`}>
+      <div className={`${style.filter} ${isExpandedFilter && style.expandedFilter} ${toggledFilterList.length > 0 && (isExpandedFilter ? style.expandedToggledFilter : style.toggledFilter)}`}>
         <div className={`${style.section} ${isExpandedFilter && style.expandedSection}`}>
           {
             isExpandedFilter && (
@@ -428,6 +471,20 @@ const shop = (serverSideProps: any) => {
             }
           </div>
         </div>
+        {
+          toggledFilterList.length > 0 && (
+            <div className={style.filterCondition} onMouseEnter={onMouseEnterFilterCondition} onMouseLeave={onMouseLeaveFilterCondition} onClick={onClickRefreshFilterButton}>
+              {
+                isMouseOveredFilterCondition ? (
+                  <Image src={refreshIcon.image} alt={refreshIcon.name} />
+                )
+                : (
+                  <h4>{toggledFilterList.length}</h4>
+                )
+              }
+            </div>
+          )
+        }
       </div>
       <div className={style.products}>
         <div className={style.productsSection}>
