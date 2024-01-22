@@ -302,6 +302,30 @@
   color: coral !important;
 }
 
+/* scrollToTop */
+.scrollToTop {
+  cursor: pointer;
+  position: fixed;
+  right: calc(50% - min(50% - 30px, 700px));
+  bottom: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 41px;
+  height: 41px;
+  border: 1px solid black;
+  border-radius: 50%;
+  background-color: black;
+}
+.scrollToTop:hover {
+  box-shadow: 0px 0px 5px 1px dimgray;
+}
+.scrollToTop img {
+  filter: invert(1);
+  width: 20px;
+  height: 20px;
+}
+
 /* Products */
 .products {
   display: flex;

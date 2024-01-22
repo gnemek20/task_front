@@ -106,6 +106,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     image: require("@/public/icons/refreshIcon.svg"),
   }
 
+  const arrowUpIcon: iconProps = {
+    name: "arrowUp",
+    image: require("@/public/icons/arrowUpIcon.svg"),
+  }
+
   const stateIcons: Array<iconProps> = [
     {
       name: "search",
@@ -294,6 +299,10 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     ]);
   }
 
+  const onClickScrollToTop = () => {
+    shopPageRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
   // onChange method
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
@@ -381,7 +390,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }, [productList, searchingWord]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(intersect, {
+    const observer: IntersectionObserver = new IntersectionObserver(intersect, {
       threshold: 0.3,
       root: null,
     });
@@ -506,6 +515,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
             </div>
           )
         }
+      </div>
+      <div className={style.scrollToTop} onClick={onClickScrollToTop}>
+        <Image src={arrowUpIcon.image} alt={arrowUpIcon.name} />
       </div>
       <div className={style.products}>
         <div className={style.productsSection}>

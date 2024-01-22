@@ -2,29 +2,26 @@
 	"products":[
 		{
 			"price":55410000,
-			"name":"bNj0LVzluYBGL83product1",
+			"name":"Chanelproduct1",
 			"isOut":"true",
 			"id":1,
 			"isNew":"false",
-			"brand":"Chanel",
 			"promotion":0
 		},
 		{
 			"price":32340000,
-			"name":"XGu4XKbvuSUk7KGproduct2",
+			"name":"Diorproduct2",
 			"isOut":"false",
 			"id":2,
 			"isNew":"false",
-			"brand":"Dior",
 			"promotion":0
 		},
 		{
 			"price":14570000,
-			"name":"Zf97hoLwEtp0FNeproduct3",
+			"name":"Chanelproduct3",
 			"isOut":"false",
 			"id":3,
 			"isNew":"false",
-			"brand":"Nike",
 			"promotion":0
 		},
 		{
