@@ -495,8 +495,20 @@
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
   }
+  .section > .select {
+    height: calc(100% - 83px);
+  }
   .option > .button {
     width: 100%;
+  }
+  .option > .options {
+    position: absolute;
+    bottom: 41px;
+    justify-content: center;
+    width: 100%;
+  }
+  .section > .search {
+    width: 180px;
   }
   .scrollToTop {
     display: none;
