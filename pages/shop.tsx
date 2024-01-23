@@ -10,7 +10,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   type typeImage = StaticImport;
   type typeImageIcons = string | StaticImport;
   type typeStartOrEnd = "start" | "end";
-  type typeFilterOptionName = "신상" | "품절" | "할인중" | "가격" | "검색어";
+  type typeBrandName = "Nike" | "Louis Vuitton" | "Chanel" | "Gucci" | "Adidas" | "Rolex" | "Dior" | "Zara";
+  type typeFilterOptionName = "신상" | "품절" | "할인중" | "브랜드" | "가격" | "검색어";
+  type typeSortingMethodName = "기본순" | "높은 가격순" | "낮은 가격순" | "높은 할인순" | "낮은 할인순";
 
   // interface
   interface imageProps {
@@ -26,11 +28,17 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     isClicked?: boolean;
     isToggled: boolean;
   }
+  interface brandProps {
+    name: typeBrandName;
+    isChecked: boolean;
+  }
   interface productProps {
     id: number;
     name: string;
+    brand: typeBrandName;
     price: number;
     promotion: number;
+    promotionalPrice: number;
     isNew: boolean;
     isOut: boolean;
   }
@@ -44,7 +52,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   // const
   const [isExpandedFilter, setIsExpandedFilter] = useState<boolean>(false);
-  const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("검색어");
+  const [showingFilter, setShowingFilter] = useState<typeFilterOptionName>("브랜드");
   const [toggledFilterList, setToggledFilterList] = useState<Array<typeFilterOptionName>>([]);
   const haventIsClickedFilterOptionList: Array<typeFilterOptionName> = ["신상", "품절", "할인중"];
   const [filterOptionList, setFilterOptionList] = useState<Array<filterOptionProps>>([
@@ -53,11 +61,16 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       isToggled: false,
     },
     {
+      name: "할인중",
+      isToggled: false,
+    },
+    {
       name: "품절",
       isToggled: false,
     },
     {
-      name: "할인중",
+      name: "브랜드",
+      isClicked: true,
       isToggled: false,
     },
     {
@@ -67,15 +80,63 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     },
     {
       name: "검색어",
-      isClicked: true,
+      isClicked: false,
       isToggled: false,
     }
+  ]);
+
+  const [isShowingCheckedBrandList, setIsShowingCheckedBrandList] = useState<boolean>(false);
+  const [searchingBrandName, setSearchingBrandName] = useState<string>("");
+  const [checkedBrandList, setCheckedBrandList] = useState<Array<typeBrandName>>([]);
+  const [brandList, setBrandList] = useState<Array<brandProps>>([
+    {
+      name: "Nike",
+      isChecked: false,
+    },
+    {
+      name: "Louis Vuitton",
+      isChecked: false,
+    },
+    {
+      name: "Chanel",
+      isChecked: false,
+    },
+    {
+      name: "Gucci",
+      isChecked: false,
+    },
+    {
+      name: "Adidas",
+      isChecked: false,
+    },
+    {
+      name: "Rolex",
+      isChecked: false,
+    },
+    {
+      name: "Dior",
+      isChecked: false,
+    },
+    {
+      name: "Zara",
+      isChecked: false,
+    },
   ]);
 
   const [startPrice, setStartPrice] = useState<number>(0);
   const [endPrice, setEndPrice] = useState<number>(0);
 
   const [searchingWord, setSearchingWord] = useState<string>("");
+
+  const [isExpandedSortingMethod, setIsExpandedSortingMethod] = useState<boolean>(false);
+  const [checkedSortingMethod, setCheckedSortingMethod] = useState<typeSortingMethodName>("기본순");
+  const [sortingMethodList, setSortingMethodList] = useState<Array<typeSortingMethodName>>([
+    "기본순",
+    "낮은 가격순",
+    "높은 가격순",
+    "낮은 할인순",
+    "높은 할인순",
+  ]);
 
   const [productList, setProductList] = useState<Array<productProps>>([]);
   const [showingProductList, setShowingProductList] = useState<Array<productProps>>([]);
@@ -106,9 +167,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     image: require("@/public/icons/refreshIcon.svg"),
   }
 
-  const arrowUpIcon: iconProps = {
-    name: "arrowUp",
-    image: require("@/public/icons/arrowUpIcon.svg"),
+  const scrollTopIcon: iconProps = {
+    name: "scrollTop",
+    image: require("@/public/icons/scrollTopIcon.svg"),
   }
 
   const xIcon: iconProps = {
@@ -150,7 +211,14 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     if (toggledFilterList.includes(filterName)) setToggledFilterList(toggledFilterList.filter((toggledFilter) => toggledFilter !== filterName));
   }
 
-  const makeQueryString = (tFilterList: Array<typeFilterOptionName>, sPrice: number, ePrice: number) => {
+  const addToCheckedBrandList = (brandName: typeBrandName) => {
+    if (!checkedBrandList.includes(brandName)) setCheckedBrandList([...checkedBrandList, brandName]);
+  }
+  const deleteFromCheckedBrandList = (brandName: typeBrandName) => {
+    if (checkedBrandList.includes(brandName)) setCheckedBrandList(checkedBrandList.filter((checkedBrand) => checkedBrand !== brandName));
+  }
+
+  const makeQueryString = (tFilterList: Array<typeFilterOptionName>, cBrandList: Array<typeBrandName>, sPrice: number, ePrice: number, sortingMethod: typeSortingMethodName) => {
     let query: string = "";
     const priceScale: number = 10000;
 
@@ -161,25 +229,35 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       else if (filter === "할인중") {
         query = [query, "promotion_ne=0"].join("&");
       }
+      else if (filter === "브랜드") {
+        cBrandList.map((brandName) => {
+          query = [query, `brand=${brandName}`].join("&");
+        });
+      }
       else if (filter === "가격") {
         if (sPrice == 0) {
-          query = [query, `price_lte=${ePrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_lte=${ePrice * priceScale}`].join("&");
         }
         else if (ePrice == 0) {
-          query = [query, `price_gte=${sPrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_gte=${sPrice * priceScale}`].join("&");
         }
         else if (sPrice > ePrice) {
-          query = [query, `price_gte=${ePrice * priceScale}`].join("&");
-          query = [query, `price_lte=${sPrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_gte=${ePrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_lte=${sPrice * priceScale}`].join("&");
         }
         else {
-          query = [query, `price_gte=${sPrice * priceScale}`].join("&");
-          query = [query, `price_lte=${ePrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_gte=${sPrice * priceScale}`].join("&");
+          query = [query, `promotionalPrice_lte=${ePrice * priceScale}`].join("&");
         }
       }
     });
 
     if (!tFilterList.includes("품절")) query = [query, "isOut=false"].join("&");
+
+    if (sortingMethod === "높은 가격순") query = [query, "_sort=price&_order=desc"].join("&");
+    else if (sortingMethod === "낮은 가격순") query = [query, "_sort=price&_order=asc"].join("&");
+    else if (sortingMethod === "높은 할인순") query = [query, "_sort=promotion&_order=desc"].join("&");
+    else if (sortingMethod === "낮은 할인순") query = [query, "_sort=promotion&_order=asc"].join("&");
 
     return query;
   }
@@ -216,6 +294,48 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         setFilterOptionList([...filterOptionList]);
       }
     });
+  }
+
+  const onclickBrand = (brandName: typeBrandName) => {
+    let checked = false;
+    brandList.map((brand) => {
+      if (brand.name == brandName) {
+        brand.isChecked = !brand.isChecked;
+        setBrandList([...brandList]);
+
+        if (brand.isChecked) {
+          addToCheckedBrandList(brandName);
+          checked = true;
+        }
+        else deleteFromCheckedBrandList(brandName);
+      }
+      else if (!checked && brand.isChecked) {
+        checked = true;
+      }
+    });
+
+    if (checked) {
+      filterOptionList.map((filter) => {
+        if (filter.name == "브랜드") {
+          addToToggledFilterList(filter.name);
+          filter.isToggled = true;
+        }
+      });
+    }
+    else {
+      filterOptionList.map((filter) => {
+        if (filter.name == "브랜드") {
+          deleteFromToggledFilterList(filter.name);
+          filter.isToggled = false;
+        }
+      });
+    }
+
+    setFilterOptionList([...filterOptionList]);
+  }
+
+  const onClickShowingCheckedBrandList = () => {
+    setIsShowingCheckedBrandList(!isShowingCheckedBrandList);
   }
 
   const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
@@ -259,7 +379,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }
 
   const onClickShowMoreProductListButton = async () => {
-    const query: string = makeQueryString(toggledFilterList, startPrice, endPrice);
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
 
     await fetch(["http://localhost:3000/products?",
     `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
@@ -273,10 +393,47 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   const onClickRefreshFilterButton = () => {
     setIsMouseOveredFilterCondition(false);
+    setIsShowingCheckedBrandList(false);
+    setSearchingBrandName("");
+    setCheckedBrandList([]);
+    setBrandList([
+      {
+        name: "Nike",
+        isChecked: false,
+      },
+      {
+        name: "Louis Vuitton",
+        isChecked: false,
+      },
+      {
+        name: "Chanel",
+        isChecked: false,
+      },
+      {
+        name: "Gucci",
+        isChecked: false,
+      },
+      {
+        name: "Adidas",
+        isChecked: false,
+      },
+      {
+        name: "Rolex",
+        isChecked: false,
+      },
+      {
+        name: "Dior",
+        isChecked: false,
+      },
+      {
+        name: "Zara",
+        isChecked: false,
+      },
+    ]);
     setStartPrice(0);
     setEndPrice(0);
     setSearchingWord("");
-    setShowingFilter("검색어");
+    setShowingFilter("브랜드");
     setToggledFilterList([]);
     setFilterOptionList([
       {
@@ -292,13 +449,18 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         isToggled: false,
       },
       {
+        name: "브랜드",
+        isClicked: true,
+        isToggled: false,
+      },
+      {
         name: "가격",
         isClicked: false,
         isToggled: false,
       },
       {
         name: "검색어",
-        isClicked: true,
+        isClicked: false,
         isToggled: false,
       }
     ]);
@@ -317,6 +479,14 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       }
     });
     setFilterOptionList(filterOptionList);
+  }
+
+  const onClickSortingMethodButton = () => {
+    setIsExpandedSortingMethod(!isExpandedSortingMethod);
+  }
+
+  const onClickChangeSortingMethodButton = (sortingMethodName: typeSortingMethodName) => {
+    setCheckedSortingMethod(sortingMethodName);
   }
 
   // onChange method
@@ -353,6 +523,10 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     setFilterOptionList([...filterOptionList]);
   }
 
+  const onChangeSearchingBrandName = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchingBrandName(event.target.value);
+  }
+
   const onChangeSearchingWord = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchingWord(event.target.value);
 
@@ -386,25 +560,25 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   // useEffect
   useEffect(() => {
-    const query: string = makeQueryString(toggledFilterList, startPrice, endPrice);
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
 
-    fetch(`http://localhost:3000/products?_page=0&_per_page=0${query}`).then((res) => res.json()).then((data) => {
-      setProductQuantity(data.items);
+    fetch(`http://localhost:3000/products?${query}`).then((res) => res.json()).then((data) => {
+      setProductQuantity(data.length);
     });
 
     setSearchingProductListPage(0);
     router.push(`/shop?${query}`, undefined, { shallow: false });
-  }, [toggledFilterList, startPrice, endPrice]);
+  }, [toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod]);
 
   useEffect(() => {
-    let list: Array<productProps> = productList;
+    let mappedProductList: Array<productProps> = productList;
 
     if (searchingWord.length > 0) {
-      list = list.filter((product) => product.name.toUpperCase().includes(searchingWord.toUpperCase()));
+      mappedProductList = mappedProductList.filter((product) => product.name.toUpperCase().includes(searchingWord.toUpperCase()));
       shopPageRef.current?.scrollIntoView();
     }
     
-    setShowingProductList(list);
+    setShowingProductList(mappedProductList);
   }, [productList, searchingWord]);
 
   useEffect(() => {
@@ -425,6 +599,46 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }, [serverSideProps]);
 
   // component
+  const filterBrand = () => {
+    return (
+      <div className={`${style.select} ${style.fadeIn}`}>
+        <div className={style.condition}>
+          <div className={style.section}>
+            <div className={style.search}>
+              <div className={style.image}>
+                <Image src={searchIcon.image} alt={searchIcon.name} />
+              </div>
+              <div className={style.input}>
+                <input id="searchBrands" type="text" value={searchingBrandName} onChange={(event) => onChangeSearchingBrandName(event)} autoComplete="off" />
+              </div>
+            </div>
+            <div className={`${style.status} ${isShowingCheckedBrandList && style.toggledStatus}`} onClick={onClickShowingCheckedBrandList}>
+              <h4>체크된 것만 보기</h4>
+            </div>
+          </div>
+        </div>
+        <div className={style.brands}>
+          {
+            brandList.map((brand, index) => (
+              brand.name.toUpperCase().includes(searchingBrandName.toUpperCase()) ? (
+                !isShowingCheckedBrandList || brand.isChecked ? (
+                  <div className={style.brand} key={index}>
+                    <label>
+                      <input id={`brandsCheckbox${index}`} type="checkbox" checked={brand.isChecked} onChange={() => onclickBrand(brand.name)} autoComplete="off" />
+                      <h4>{brand.name}</h4>
+                    </label>
+                  </div>
+                )
+                : ''
+              )
+              : ''
+            ))
+          }
+        </div>
+      </div>
+    )
+  }
+
   const filterPrice = () => {
     return (
       <div className={`${style.select} ${style.fadeIn}`}>
@@ -494,8 +708,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         <div className={`${style.section} ${isExpandedFilter && style.expandedSection}`}>
           {
             isExpandedFilter && (
-              showingFilter == "가격" ? filterPrice()
-              : showingFilter == "검색어" ? filterSearch()
+              showingFilter === "브랜드" ? filterBrand()
+              : showingFilter === "가격" ? filterPrice()
+              : showingFilter === "검색어" ? filterSearch()
               : <div>Template Error</div>
             )
           }
@@ -538,13 +753,31 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         }
       </div>
       <div className={style.scrollToTop} onClick={onClickScrollToTop}>
-        <Image src={arrowUpIcon.image} alt={arrowUpIcon.name} />
+        <Image src={scrollTopIcon.image} alt={scrollTopIcon.name} />
       </div>
       <div className={style.products}>
         <div className={style.productsSection}>
           <div className={style.productListState}>
             <div>
               <h4>{searchingWord.length === 0 ? productQuantity : showingProductList.length}개의 결과</h4>
+            </div>
+            <div className={style.sortingMethod} onClick={onClickSortingMethodButton}>
+              <div className={style.sortingMethodName} onClick={onClickSortingMethodButton}>
+                <h4>{checkedSortingMethod}</h4>
+              </div>
+              {
+                isExpandedSortingMethod && (
+                  <div className={style.sortingMethodList}>
+                    {
+                      sortingMethodList.map((sortingMethodName, index) => (
+                        <div key={index} onClick={() => onClickChangeSortingMethodButton(sortingMethodName)}>
+                          <h4>{sortingMethodName}</h4>
+                        </div>
+                      ))
+                    }
+                  </div>
+                )
+              }
             </div>
           </div>
           <div className={style.productsList}>
@@ -556,8 +789,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
                   </div>
                   <div className={style.productDescription}>
                     <div className={style.productText}>
+                      <div className={style.productBrand}>
+                        <h6>{product.brand}</h6>
+                      </div>
                       <div className={style.productName}>
-                        <h4>{product.name}</h4>
+                        <h5>{product.name}</h5>
                       </div>
                     </div>
                     {
@@ -568,7 +804,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
                             <h5 className={style.productPromotion}>{product.promotion}%</h5>
                           </div>
                           <div>
-                            <h3>{(product.price - (product.price / product.promotion)).toFixed().toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}원</h3>
+                            <h3>{product.promotionalPrice.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}원</h3>
                           </div>
                         </div>
                       )
