@@ -57,15 +57,15 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   const haventIsClickedFilterOptionList: Array<typeFilterOptionName> = ["신상", "품절", "할인중"];
   const [filterOptionList, setFilterOptionList] = useState<Array<filterOptionProps>>([
     {
+      name: "품절",
+      isToggled: false,
+    },
+    {
       name: "신상",
       isToggled: false,
     },
     {
       name: "할인중",
-      isToggled: false,
-    },
-    {
-      name: "품절",
       isToggled: false,
     },
     {
@@ -130,13 +130,13 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   const [isExpandedSortingMethod, setIsExpandedSortingMethod] = useState<boolean>(false);
   const [checkedSortingMethod, setCheckedSortingMethod] = useState<typeSortingMethodName>("기본순");
-  const [sortingMethodList, setSortingMethodList] = useState<Array<typeSortingMethodName>>([
+  const sortingMethodList: Array<typeSortingMethodName> = [
     "기본순",
     "낮은 가격순",
     "높은 가격순",
     "낮은 할인순",
     "높은 할인순",
-  ]);
+  ];
 
   const [productList, setProductList] = useState<Array<productProps>>([]);
   const [showingProductList, setShowingProductList] = useState<Array<productProps>>([]);
@@ -254,8 +254,8 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
     if (!tFilterList.includes("품절")) query = [query, "isOut=false"].join("&");
 
-    if (sortingMethod === "높은 가격순") query = [query, "_sort=price&_order=desc"].join("&");
-    else if (sortingMethod === "낮은 가격순") query = [query, "_sort=price&_order=asc"].join("&");
+    if (sortingMethod === "높은 가격순") query = [query, "_sort=promotionalPrice&_order=desc"].join("&");
+    else if (sortingMethod === "낮은 가격순") query = [query, "_sort=promotionalPrice&_order=asc"].join("&");
     else if (sortingMethod === "높은 할인순") query = [query, "_sort=promotion&_order=desc"].join("&");
     else if (sortingMethod === "낮은 할인순") query = [query, "_sort=promotion&_order=asc"].join("&");
 
@@ -437,11 +437,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     setToggledFilterList([]);
     setFilterOptionList([
       {
-        name: "신상",
+        name: "품절",
         isToggled: false,
       },
       {
-        name: "품절",
+        name: "신상",
         isToggled: false,
       },
       {
