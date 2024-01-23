@@ -674,7 +674,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       <div className={`${style.select} ${style.fadeIn}`}>
         <div className={style.filterSearchSection}>
           <div className={style.searchBox}>
-            <input type="text" value={searchingWord} onChange={(event) => onChangeSearchingWord(event)} />
+            <input type="text" id="searchingWord" value={searchingWord} onChange={(event) => onChangeSearchingWord(event)} />
             <div className={style.imageIcon}>
               <Image src={searchIcon.image} alt={searchIcon.name} />
             </div>
