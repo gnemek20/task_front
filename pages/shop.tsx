@@ -53,11 +53,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       isToggled: false,
     },
     {
-      name: "품절",
+      name: "할인중",
       isToggled: false,
     },
     {
-      name: "할인중",
+      name: "품절",
       isToggled: false,
     },
     {

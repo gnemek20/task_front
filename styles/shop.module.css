@@ -460,6 +460,11 @@
     left: 0;
     bottom: 0;
     width: calc(100% - 2px);
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  .option > .button {
+    width: 100%;
   }
   .scrollToTop {
     display: none;
