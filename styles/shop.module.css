@@ -6,6 +6,7 @@
 
 /* Header */
 .header {
+  z-index: 1;
   position: fixed;
   top: 0px;
   display: flex;
@@ -332,10 +333,41 @@
 .productListState {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   max-width: 1000px;
   margin-top: 10px;
   margin-bottom: 30px;
+  user-select: none;
+}
+.sortingMethod {
+  z-index: 0;
+  position: relative;
+}
+.sortingMethodName {
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+}
+.sortingMethodList {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0px;
+  width: 150px;
+  border: 1px solid dimgray;
+  background-color: white;
+}
+.sortingMethodList > * {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 15px 20px;
+}
+.sortingMethodList > *:hover {
+  background-color: #ededed;
 }
 .productsList {
   display: grid;

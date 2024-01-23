@@ -12,6 +12,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   type typeStartOrEnd = "start" | "end";
   type typeBrandName = "Nike" | "Louis Vuitton" | "Chanel" | "Gucci" | "Adidas" | "Rolex" | "Dior" | "Zara";
   type typeFilterOptionName = "신상" | "품절" | "할인중" | "브랜드" | "가격" | "검색어";
+  type typeSortingMethodName = "기본순" | "높은 가격순" | "낮은 가격순" | "높은 할인순" | "낮은 할인순";
 
   // interface
   interface imageProps {
@@ -127,6 +128,16 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   const [searchingWord, setSearchingWord] = useState<string>("");
 
+  const [isExpandedSortingMethod, setIsExpandedSortingMethod] = useState<boolean>(false);
+  const [checkedSortingMethod, setCheckedSortingMethod] = useState<typeSortingMethodName>("기본순");
+  const [sortingMethodList, setSortingMethodList] = useState<Array<typeSortingMethodName>>([
+    "기본순",
+    "낮은 가격순",
+    "높은 가격순",
+    "낮은 할인순",
+    "높은 할인순",
+  ]);
+
   const [productList, setProductList] = useState<Array<productProps>>([]);
   const [showingProductList, setShowingProductList] = useState<Array<productProps>>([]);
   const [productQuantity, setProductQuantity] = useState<number>(0);
@@ -156,9 +167,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     image: require("@/public/icons/refreshIcon.svg"),
   }
 
-  const arrowUpIcon: iconProps = {
-    name: "arrowUp",
-    image: require("@/public/icons/arrowUpIcon.svg"),
+  const scrollTopIcon: iconProps = {
+    name: "scrollTop",
+    image: require("@/public/icons/scrollTopIcon.svg"),
   }
 
   const xIcon: iconProps = {
@@ -207,7 +218,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     if (checkedBrandList.includes(brandName)) setCheckedBrandList(checkedBrandList.filter((checkedBrand) => checkedBrand !== brandName));
   }
 
-  const makeQueryString = (tFilterList: Array<typeFilterOptionName>, cBrandList: Array<typeBrandName>, sPrice: number, ePrice: number) => {
+  const makeQueryString = (tFilterList: Array<typeFilterOptionName>, cBrandList: Array<typeBrandName>, sPrice: number, ePrice: number, sortingMethod: typeSortingMethodName) => {
     let query: string = "";
     const priceScale: number = 10000;
 
@@ -242,6 +253,11 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     });
 
     if (!tFilterList.includes("품절")) query = [query, "isOut=false"].join("&");
+
+    if (sortingMethod === "높은 가격순") query = [query, "_sort=price&_order=desc"].join("&");
+    else if (sortingMethod === "낮은 가격순") query = [query, "_sort=price&_order=asc"].join("&");
+    else if (sortingMethod === "높은 할인순") query = [query, "_sort=promotion&_order=desc"].join("&");
+    else if (sortingMethod === "낮은 할인순") query = [query, "_sort=promotion&_order=asc"].join("&");
 
     return query;
   }
@@ -363,7 +379,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }
 
   const onClickShowMoreProductListButton = async () => {
-    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice);
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
 
     await fetch(["http://localhost:3000/products?",
     `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
@@ -465,6 +481,14 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     setFilterOptionList(filterOptionList);
   }
 
+  const onClickSortingMethodButton = () => {
+    setIsExpandedSortingMethod(!isExpandedSortingMethod);
+  }
+
+  const onClickChangeSortingMethodButton = (sortingMethodName: typeSortingMethodName) => {
+    setCheckedSortingMethod(sortingMethodName);
+  }
+
   // onChange method
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
     const value: string = event.target.value.replace(/[^0-9]/g, '');
@@ -536,7 +560,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
   // useEffect
   useEffect(() => {
-    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice);
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
 
     fetch(`http://localhost:3000/products?${query}`).then((res) => res.json()).then((data) => {
       setProductQuantity(data.length);
@@ -544,7 +568,7 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
 
     setSearchingProductListPage(0);
     router.push(`/shop?${query}`, undefined, { shallow: false });
-  }, [toggledFilterList, checkedBrandList, startPrice, endPrice]);
+  }, [toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod]);
 
   useEffect(() => {
     let mappedProductList: Array<productProps> = productList;
@@ -729,13 +753,31 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         }
       </div>
       <div className={style.scrollToTop} onClick={onClickScrollToTop}>
-        <Image src={arrowUpIcon.image} alt={arrowUpIcon.name} />
+        <Image src={scrollTopIcon.image} alt={scrollTopIcon.name} />
       </div>
       <div className={style.products}>
         <div className={style.productsSection}>
           <div className={style.productListState}>
             <div>
               <h4>{searchingWord.length === 0 ? productQuantity : showingProductList.length}개의 결과</h4>
+            </div>
+            <div className={style.sortingMethod} onClick={onClickSortingMethodButton}>
+              <div className={style.sortingMethodName} onClick={onClickSortingMethodButton}>
+                <h4>{checkedSortingMethod}</h4>
+              </div>
+              {
+                isExpandedSortingMethod && (
+                  <div className={style.sortingMethodList}>
+                    {
+                      sortingMethodList.map((sortingMethodName, index) => (
+                        <div key={index} onClick={() => onClickChangeSortingMethodButton(sortingMethodName)}>
+                          <h4>{sortingMethodName}</h4>
+                        </div>
+                      ))
+                    }
+                  </div>
+                )
+              }
             </div>
           </div>
           <div className={style.productsList}>
