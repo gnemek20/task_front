@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "json": "json-server --watch ./public/data/productsData.json",
-    "test-json": "json-server --watch ./public/data/testProductListData.json --port 3001",
+    "test-json": "json-server --watch ./public/data/productsData.json --port 3001",
     "dev": "next dev -p 80",
     "build": "next build",
     "start": "next start -p 80",
     "lint": "next lint"
   },
   "dependencies": {
+    "json-server": "^0.17.4",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",

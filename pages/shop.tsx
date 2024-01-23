@@ -192,33 +192,50 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     },
   ]
 
+
+  
   // method
   const reload = () => {
     // 현재 페이지를 다시 불러옵니다.
+
     window.location.reload();
   }
 
   const intersect = useCallback(async ([entry]: IntersectionObserverEntry[]) => {
+    // more 버튼이 화면에 보이는지를 기다립니다.
+
     if (entry.isIntersecting) {
       onClickShowMoreProductListButton();
+      // more 버튼이 화면에 보이면 해당 버튼을 클릭합니다.
+      // 이를 통해 스크롤만으로도 모든 아이템을 조회할 수 있도록 합니다.
     }
   }, [productList]);
 
   const addToToggledFilterList = (filterName: typeFilterOptionName) => {
+    // toggledFilterList에 filterName이 없을 경우 filterName을 추가합니다.
+
     if (!toggledFilterList.includes(filterName)) setToggledFilterList([...toggledFilterList, filterName]);
   }
   const deleteFromToggledFilterList = (filterName: typeFilterOptionName) => {
+    // toggledFilterList에 filterName이 있을 경우 filterName을 제외하여 리스트를 재정의 합니다.
+
     if (toggledFilterList.includes(filterName)) setToggledFilterList(toggledFilterList.filter((toggledFilter) => toggledFilter !== filterName));
   }
 
   const addToCheckedBrandList = (brandName: typeBrandName) => {
+    // checkedBrandList에 brandName이 없을 경우 brandName을 추가합니다.
+
     if (!checkedBrandList.includes(brandName)) setCheckedBrandList([...checkedBrandList, brandName]);
   }
   const deleteFromCheckedBrandList = (brandName: typeBrandName) => {
+    // checkedBrandList에 brandName이 있을 경우 brandName을 제외하여 리스트를 재정의 합니다.
+
     if (checkedBrandList.includes(brandName)) setCheckedBrandList(checkedBrandList.filter((checkedBrand) => checkedBrand !== brandName));
   }
 
   const makeQueryString = (tFilterList: Array<typeFilterOptionName>, cBrandList: Array<typeBrandName>, sPrice: number, ePrice: number, sortingMethod: typeSortingMethodName) => {
+    // 각 조건에 따라 json에 요청할 query를 만듭니다.
+
     let query: string = "";
     const priceScale: number = 10000;
 
@@ -227,6 +244,8 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         query = [query, "isNew=true"].join("&");
       }
       else if (filter === "할인중") {
+        // promotion이 0이 아닌 값들만 검색합니다.
+
         query = [query, "promotion_ne=0"].join("&");
       }
       else if (filter === "브랜드") {
@@ -236,16 +255,25 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       }
       else if (filter === "가격") {
         if (sPrice == 0) {
+          // lte는 최솟값입니다.
+
           query = [query, `promotionalPrice_lte=${ePrice * priceScale}`].join("&");
         }
         else if (ePrice == 0) {
+          // gte는 최댓값입니다.
+
           query = [query, `promotionalPrice_gte=${sPrice * priceScale}`].join("&");
         }
         else if (sPrice > ePrice) {
+          // 만약 두 값이 모두 입력된 상태라면
+          // 작은 값을 최솟값으로, 큰 값을 최댓값으로 하여 범위를 지정합니다.
+
           query = [query, `promotionalPrice_gte=${ePrice * priceScale}`].join("&");
           query = [query, `promotionalPrice_lte=${sPrice * priceScale}`].join("&");
         }
         else {
+          // 작은 값을 최솟값으로, 큰 값을 최댓값으로 하여 범위를 지정합니다.
+
           query = [query, `promotionalPrice_gte=${sPrice * priceScale}`].join("&");
           query = [query, `promotionalPrice_lte=${ePrice * priceScale}`].join("&");
         }
@@ -253,80 +281,127 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     });
 
     if (!tFilterList.includes("품절")) query = [query, "isOut=false"].join("&");
+    // 기본적으로 품절 상품을 제외하여 가져오기 위해
+    // 품절이 토글되어있지 않으면 isOut(품절)이 false인 값만 가져옵니다.
 
     if (sortingMethod === "높은 가격순") query = [query, "_sort=promotionalPrice&_order=desc"].join("&");
     else if (sortingMethod === "낮은 가격순") query = [query, "_sort=promotionalPrice&_order=asc"].join("&");
     else if (sortingMethod === "높은 할인순") query = [query, "_sort=promotion&_order=desc"].join("&");
     else if (sortingMethod === "낮은 할인순") query = [query, "_sort=promotion&_order=asc"].join("&");
+    // checked(선택)된 sortingMethod에 따라 값을 정렬합니다.
+    // 기본순일 경우 아무런 조건이 없습니다.
 
     return query;
   }
 
+
+
   // onClick method
   const onClickFilterButton = () => {
     // 필터 버튼을 클릭하면 필터를 펼치거나 축소합니다.
+
     setIsExpandedFilter(!isExpandedFilter);
   }
 
   const onclickFilterOption = (filterName: typeFilterOptionName) => {
+    // 필터의 옵션(품절, 브랜드 등)이 클릭됐을 경우
+
     if (haventIsClickedFilterOptionList.includes(filterName)) {
+      // filterOptionList에서 isClicked가 없는 필터일 경우 ([품절, 신상, 할인중])
+
       filterOptionList.map((filter) => {
         if (filter.name == filterName) {
+          // 클릭된 필터가 무엇인지 찾습니다.
+
           filter.isToggled = !filter.isToggled;
           setFilterOptionList([...filterOptionList]);
+          // 해당 필터의 토글 상태를 뒤집습니다. (true to false || false to true)
 
           if (filter.isToggled) addToToggledFilterList(filterName);
           else deleteFromToggledFilterList(filterName);
+          // 만약 토글되었다면 toggledFilterList에 해당 필터를 추가하고
+          // 토글이 해제되었다면 toggledFilterList로부터 해당 필터를 제거합니다.
         }
       });
 
       return;
     }
+    else {
+      // filterOptionList에서 isClicked가 있는 필터일 경우 ([브랜드, 가격, 검색어])
 
-    filterOptionList.map((filter) => {
-      if (filter.name == filterName) {
-        filter.isClicked = true;
-        setFilterOptionList([...filterOptionList]);
-        setShowingFilter(filterName);
-      }
-      else if (!haventIsClickedFilterOptionList.includes(filter.name)) {
-        filter.isClicked = false;
-        setFilterOptionList([...filterOptionList]);
-      }
-    });
+      filterOptionList.map((filter) => {
+        if (filter.name == filterName) {
+          filter.isClicked = true;
+          setFilterOptionList([...filterOptionList]);
+          setShowingFilter(filterName);
+          // 클릭된 필터의 isClicked를 true 상태로 변환하고
+          // 클릭된 필터의 컴포넌트를 보여줍니다.
+        }
+        else if (filter.name) {
+          // 클릭된 필터가 아니고, isClicked 옵션이 있는 필터일 경우
+
+          filter.isClicked = false;
+          setFilterOptionList([...filterOptionList]);
+          // 필터의 isClicked를 false 상태로 변환합니다.
+        }
+      });
+    }
   }
 
   const onclickBrand = (brandName: typeBrandName) => {
+    // 브랜드 중 하나가 클릭됐을 경우
+
     let checked = false;
+    // 체크된 브랜드가 하나라도 존재 하는지 파악하기 위한 변수입니다.
+
     brandList.map((brand) => {
       if (brand.name == brandName) {
+        // 클릭된 브랜드가 무엇인지 찾습니다.
+
         brand.isChecked = !brand.isChecked;
         setBrandList([...brandList]);
+        // 해당 브랜드의 isChecked를 뒤집습니다.
 
         if (brand.isChecked) {
+          // 체크된 브랜드의 경우
+
           addToCheckedBrandList(brandName);
           checked = true;
+          // checkedBrandList에 해당 브랜드를 추가합니다.
         }
-        else deleteFromCheckedBrandList(brandName);
+        else {
+          // 체크되지 않은 브랜드의 경우
+
+          deleteFromCheckedBrandList(brandName);
+          // checkedBrandList로부터 해당 브랜드를 제거합니다.
+        }
       }
       else if (!checked && brand.isChecked) {
+        // 만약 클릭된 브랜드가 아님에도 isChecked의 값이 true인 경우 (체크된 브랜드의 경우)
+
         checked = true;
       }
     });
 
     if (checked) {
+      // 만약 체크된 브랜드가 하나라도 존재한다면
+
       filterOptionList.map((filter) => {
         if (filter.name == "브랜드") {
           addToToggledFilterList(filter.name);
           filter.isToggled = true;
+          // 브랜드 필터를 토글 상태로 만듭니다.
         }
       });
     }
     else {
+      // 만약 체크된 브랜드가 하나도 없다면
+
       filterOptionList.map((filter) => {
         if (filter.name == "브랜드") {
           deleteFromToggledFilterList(filter.name);
           filter.isToggled = false;
+          // 브랜드 필터의 토글 상태를 해제합니다.
         }
       });
     }
@@ -335,28 +410,44 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }
 
   const onClickShowingCheckedBrandList = () => {
+    // 체크된 브랜드만을 보여줄지 결정합니다.
+
     setIsShowingCheckedBrandList(!isShowingCheckedBrandList);
   }
 
   const onClickPrices = (event: MouseEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
+    // 클릭한 가격 필터의 입력란을 공백으로 만듭니다.
+
     (event.target as HTMLInputElement).value = "";
+    // 클릭한 input의 값을 공백으로 만듭니다.
 
     if (startEnd == "start") setStartPrice(0);
     else if (startEnd == "end") setEndPrice(0);
+    // 이후 어떤 가격을 클릭했는지에 따라 (~만원부터 혹은 ~만원까지)
+    // 클릭한 가격의 값을 0으로 바꿉니다.
 
     if ((startEnd == "start" ? endPrice : startPrice) > 0) {
+      // 선택되지 않은 가격의 값이 0보다 클 경우
+      // 가격의 범위를 지정해둔 것으로 판단하여 토글 상태로 변환합니다.
+      // (ex. ~만원부터의 input을 클릭했을 경우) ~까지의 가격이 0보다 큰가?
+      // (ex. ~만원까지의 input을 클릭했을 경우) ~부터의 가격이 0보다 큰가?
+
       filterOptionList.map((filter) => {
         if (filter.name == "가격") {
           filter.isToggled = true;
           addToToggledFilterList(filter.name);
+          // 가격 필터를 토글 상태로 만듭니다.
         }
       });
     }
     else {
+      // 두 가격의 값 모두 1보다 작을 경우 (입력되지 않았을 경우)
+
       filterOptionList.map((filter) => {
         if (filter.name == "가격") {
           filter.isToggled = false;
           deleteFromToggledFilterList(filter.name);
+          // 가격 필터의 토글 상태를 해제합니다.
         }
       });
     }
@@ -365,33 +456,42 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }
 
   const onClickResetPrices = () => {
+    // 가격의 초기화 버튼을 눌렀을 경우
+
     setStartPrice(0);
     setEndPrice(0);
+    // 두 가격의 값을 0으로 초기화합니다.
 
     filterOptionList.map((filter) => {
       if (filter.name == "가격") {
         filter.isToggled = false;
         deleteFromToggledFilterList(filter.name);
+        // 가격 필터의 토글 상태를 해제합니다.
       }
     });
 
     setFilterOptionList([...filterOptionList]);
   }
 
-  const onClickShowMoreProductListButton = async () => {
-    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
+  const onClickEraseSearchingWord = () => {
+    // 필터의 검색어 탭에서 x 버튼을 눌렀을 경우
 
-    await fetch(["http://localhost:3000/products?",
-    `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
-    `&_end=${searchingProductQuantity * (searchingProductListPage + 2)}`,
-    `${query}`].join("")).then((res) => res.json()).then((data) => {
-      setProductList([...productList, ...data]);
+    setSearchingWord("");
+    // 검색어를 공백으로 만듭니다.
+
+    filterOptionList.map((filter) => {
+      if (filter.name === "검색어") {
+        filter.isToggled = false;
+        // 검색어 필터의 토글 상태를 해제합니다.
+      }
     });
-
-    setSearchingProductListPage(searchingProductListPage + 1);
+    setFilterOptionList(filterOptionList);
   }
 
   const onClickRefreshFilterButton = () => {
+    // 모든 필터 해제 버튼을 눌렀을 경우 (필터 버튼 옆에 생기는 버튼)
+    // 필터에서 설정 가능한 모든 값을 초기화합니다.
+
     setIsMouseOveredFilterCondition(false);
     setIsShowingCheckedBrandList(false);
     setSearchingBrandName("");
@@ -467,34 +567,61 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }
 
   const onClickScrollToTop = () => {
+    // 클릭시 스크롤을 최상단으로 스크롤합니다.
+
     shopPageRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
-  const onClickEraseSearchingWord = () => {
-    setSearchingWord("");
-
-    filterOptionList.map((filter) => {
-      if (filter.name === "검색어") {
-        filter.isToggled = false;
-      }
-    });
-    setFilterOptionList(filterOptionList);
-  }
-
   const onClickSortingMethodButton = () => {
+    // 우상단의 정렬 방법을 클릭했을 경우
+
     setIsExpandedSortingMethod(!isExpandedSortingMethod);
+    // 새로운 element를 띄워 정렬 방법의 리스트를 보여주거나
+    // 해당 element를 닫습니다.
   }
 
   const onClickChangeSortingMethodButton = (sortingMethodName: typeSortingMethodName) => {
+    // 정렬 방법을 선택했을 경우
+
     setCheckedSortingMethod(sortingMethodName);
+    // 선택한 방법으로 변경합니다.
   }
 
+  const onClickShowMoreProductListButton = async () => {
+    // 상품 리스트에서 더보기 버튼을 클릭했을 경우
+
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
+
+    await fetch(["http://localhost:3000/products?",
+    `_start=${searchingProductQuantity * (searchingProductListPage + 1)}`,
+    `&_end=${searchingProductQuantity * (searchingProductListPage + 2)}`,
+    `${query}`].join("")).then((res) => res.json()).then((data) => {
+      setProductList([...productList, ...data]);
+    });
+    // 현재까지 조회된 데이터 이후의 값을
+    // 필터에 맞춰 최대 51개까지 요청한 뒤
+    // productList에 추가합니다.
+
+    setSearchingProductListPage(searchingProductListPage + 1);
+  }
+
+
+
   // onChange method
+  const onChangeSearchingBrandName = (event: ChangeEvent<HTMLInputElement>) => {
+    // 브랜드 필터의 검색창에 브랜드명을 입력할 경우
+
+    setSearchingBrandName(event.target.value);
+  }
+
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>, startEnd: typeStartOrEnd) => {
+    // 가격에 값을 입력했을 경우
+
     const value: string = event.target.value.replace(/[^0-9]/g, '');
     const clarifiedValue: string = value[0] == "0" ? value.replace("0", '') : value;
     const price: number = clarifiedValue.length > 0 ? parseInt(clarifiedValue) : 0;
     event.target.value = clarifiedValue;
+    // 숫자를 제외한 문자 혹은 0으로 시작하는 값일 경우 공백으로 바꿉니다.
 
     if (startEnd == "start") {
       setStartPrice(clarifiedValue == "" ? 0 : price);
@@ -502,8 +629,14 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     else if (startEnd == "end") {
       setEndPrice(clarifiedValue == "" ? 0 : price);
     }
+    // 어떤 가격에 입력했는지에 따라 다르게 저장합니다.
+    // stratPrice는 ~만원부터에 입력했을 경우
+    // endPrice는 ~만원까지에 입력했을 경우
 
     if (price + (startEnd == "start" ? endPrice : startPrice) > 0) {
+      // 현재 입력한 값과 선택되지 않은 값의 합이 0보다 클 경우
+      // 가격의 범주가 입력된 것으로 판단하여 토글 상태로 바꿉니다.
+
       filterOptionList.map((filter) => {
         if (filter.name == "가격") {
           filter.isToggled = true;
@@ -512,6 +645,9 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       });
     }
     else {
+      // 현재 입력한 값과 선택되지 않은 값의 합이 0보다 작을 경우 (입력되지 않은 경우)
+      // 범주가 지정되지 않은 것으로 판단하여 토글 상태를 해제합니다.
+
       filterOptionList.map((filter) => {
         if (filter.name == "가격") {
           filter.isToggled = false;
@@ -523,18 +659,19 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     setFilterOptionList([...filterOptionList]);
   }
 
-  const onChangeSearchingBrandName = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchingBrandName(event.target.value);
-  }
-
   const onChangeSearchingWord = (event: ChangeEvent<HTMLInputElement>) => {
+    // 검색어 필터의 검색창에 검색어를 입력할 경우
     setSearchingWord(event.target.value);
 
     if (event.target.value.length > 0) {
+      // 검색어가 한 글자라도 입력되어있다면 토글 상태로 바꿉니다.
+
       filterOptionList.map((filter) => {
         if (filter.name === "검색어") {
           filter.isToggled = true;
           // addToToggledFilterList(filter.name);
+          // 현재 조회된 데이터 범위 내에서 검색하므로
+          // toggledFilterList에는 넣지 않습니다. (toggledFilterList에 값이 들어가면 serverSide에 의해 데이터가 재조회됩니다.)
         }
       });
     }
@@ -543,34 +680,54 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
         if (filter.name === "검색어") {
           filter.isToggled = false;
           // deleteFromToggledFilterList(filter.name);
+          // toggledFilterList에 검색어 필터가 있을 리 없으므로
+          // toggledFilterList로부터 값을 제거하지 않습니다.
         }
       });
     }
   }
 
+
+
   // onMouseEnter method
   const onMouseEnterFilterCondition = () => {
+    // 필터 바로 옆 토글된 필터의 수를 표시하는 요소에 마우스가 들어왔을 경우
+
     setIsMouseOveredFilterCondition(true);
+    // mouseOver 상태를 true로 바꿉니다.
   }
 
   // onMouseLeave method
   const onMouseLeaveFilterCondition = () => {
+    // 필터 바로 옆 토글된 필터의 수를 표시하는 요소로부터 마우스가 나갔을 경우
+
     setIsMouseOveredFilterCondition(false);
+    // mouseOver 상태를 false로 바꿉니다.
   }
+
+
 
   // useEffect
   useEffect(() => {
-    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
+    // 필터의 조건이 검색되면 이를 바탕으로 쿼리를 만들어 페이지의 쿼리를 변경합니다.
+    // 이를 통해 serverSide에서 데이터를 새롭게 조회하도록 합니다.
 
+    const query: string = makeQueryString(toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod);
+    
     fetch(`http://localhost:3000/products?${query}`).then((res) => res.json()).then((data) => {
       setProductQuantity(data.length);
     });
+    // json-server는 조회된 데이터의 수를 제공해주지 않습니다.
+    // 따라서 부득이하게 같은 쿼리로 전체 데이터를 불러와 그 수를 저장합니다.
 
     setSearchingProductListPage(0);
     router.push(`/shop?${query}`, undefined, { shallow: false });
   }, [toggledFilterList, checkedBrandList, startPrice, endPrice, checkedSortingMethod]);
 
   useEffect(() => {
+    // productList가 변경되거나 검색어가 변경되었을 때
+    // 검색어에 따라 현재 조회된 데이터 범위 내에서 상품을 출력합니다.
+
     let mappedProductList: Array<productProps> = productList;
 
     if (searchingWord.length > 0) {
@@ -582,6 +739,10 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
   }, [productList, searchingWord]);
 
   useEffect(() => {
+    // 리스트 하단의 더보기 버튼이 보일 경우
+    // 이후의 데이터를 조회하여 무한 스크롤링 할 수 있도록
+    // observer로 감지합니다.
+
     const observer: IntersectionObserver = new IntersectionObserver(intersect, {
       threshold: 0.3,
       root: null,
@@ -590,13 +751,21 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
     if (showMoreButtonRef.current) observer.observe(showMoreButtonRef.current);
 
     return () => {
+      // life cycle에서 destroy될 때
+      // observer를 종료합니다.
+      
       observer.disconnect();
     }
   }, [intersect, showMoreButtonRef.current]);
 
   useEffect(() => {
+    // SSR을 위하여 서버 사이드로부터 데이터가 조회될 경우
+    // 조회된 데이터를 productList에 추가합니다.
+
     setProductList(serverSideProps.productList);
   }, [serverSideProps]);
+
+
 
   // component
   const filterBrand = () => {
@@ -686,6 +855,8 @@ const shop = (serverSideProps: InferGetServerSidePropsType<typeof getServerSideP
       </div>
     )
   }
+
+
 
   // main
   return (
@@ -858,6 +1029,10 @@ export default memo(shop);
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // URL의 쿼리가 변경될 경우 (router.push될 경우)
+    // 해당 쿼리를 바탕으로 서버로부터 데이터를 새롭게 조회합니다.
+    // 조회되는 데이터는 최대 51개입니다. (pc 환경에서 상품을 한 줄에 3개씩 보여주기 때문)
+
     const query = context.resolvedUrl.replace("/shop?", "");
     const productList = await fetch([`http://localhost:3000/products`,
     `?_start=0`,
@@ -869,6 +1044,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
   catch (error) {
+    // 서버 연결에 오류가 발생하여도 별다른 처리는 하지 않습니다.
+
     return {
       props: {}
     };
